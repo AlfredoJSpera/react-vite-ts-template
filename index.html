@@ -2,17 +2,41 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<link rel="icon" type="image/svg+xml" href="/vite.svg" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Vite + React + TS</title>
+		<!--! Script to avoid the Flash of Unstyled Theme -->
 		<script>
-			// https://dev.to/gaisdav/how-to-prevent-theme-flash-in-a-react-instant-dark-mode-switching-o20
-
+			// Immediately apply the saved theme from localStorage
 			(function () {
-				const theme = localStorage.getItem("theme") || "default";
-				document.documentElement.setAttribute("data-theme", theme);
+				try {
+					const theme = localStorage.getItem("theme");
+
+					if (theme) {
+						const parsed = JSON.parse(theme);
+
+						if (parsed?.name) {
+							document.documentElement.setAttribute(
+								"data-theme",
+								parsed.name
+							);
+
+							// Apply any CSS variables in the theme if it is a custom one
+							if (parsed.customVariables) {
+								for (const [key, value] of Object.entries(
+									parsed.customVariables
+								)) {
+									document.documentElement.style.setProperty(
+										key,
+										value
+									);
+								}
+							}
+						}
+					}
+				} catch (e) {
+					console.warn("Failed to load theme before React:", e);
+				}
 			})();
 		</script>
+		<link rel="stylesheet" href="/src/theme/default-themes.css" />
 	</head>
 	<body>
 		<div id="root"></div>

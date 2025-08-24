@@ -1,0 +1,15 @@
+:root {
+	/* Main default theme: "light" */
+	--color-bg: white;
+	--color-text: black;
+}
+
+[data-theme="dark"] {
+	--color-bg: #1e1e1e;
+	--color-text: #f5f5f5;
+}
+
+[data-theme="blue"] {
+	--color-bg: #e6f0ff;
+	--color-text: #003366;
+}
