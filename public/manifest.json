@@ -1,0 +1,10 @@
+{
+	"manifest_version": 2,
+	"name": "React New Tab",
+	"version": "1.0",
+	"description": "Replace the new tab with a react app.",
+	"icons": {},
+	"chrome_url_overrides": {
+		"newtab": "index.html"
+	}
+}
