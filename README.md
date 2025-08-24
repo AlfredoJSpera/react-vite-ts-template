@@ -9,6 +9,15 @@ This repository is a **template project** for quickly bootstrapping a modern Rea
 -   Built-in **theme management** (theme switcher + persisted custom user-defined themes) and a fix for the [flash of unstyled content](https://en.wikipedia.org/wiki/Flash_of_unstyled_content) issue
 -   Ready-to-package as a **Firefox extension (.xpi)**
 
+## TODO
+
+-   [x] Set up Vite
+-   [x] Local Storage State manager
+-   [x] Theme manager
+-   [x] Flash of Unstyled Content fix
+-   [x] Firefox-ready
+-   [ ] Settings JSON downloader
+
 ## Getting Started
 
 ### 1. Clone the template
@@ -85,5 +94,4 @@ npm run build:xpi
 
 ## License
 
-This template is provided as-is under the MIT license.
-Feel free to fork and customize it for your projects.
+This template is provided as-is under the [MIT license](LICENSE). Feel free to fork and customize it for your projects.
