@@ -1,69 +1,88 @@
-# React + TypeScript + Vite
+# react-vite-ts-template
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This repository is a **template project** for quickly bootstrapping a modern React application using **TypeScript**, **Vite**, and **SWC**.
 
-Currently, two official plugins are available:
+## Features
 
--   [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
--   [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+-   **Vite 7 + SWC** for fast builds and hot module replacement
+-   **React 19** with **TypeScript** typings
+-   Built-in **theme management** (theme switcher + persisted custom user-defined themes) and a fix for the [flash of unstyled content](https://en.wikipedia.org/wiki/Flash_of_unstyled_content) issue
+-   Ready-to-package as a **Firefox extension (.xpi)**
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 1. Clone the template
 
-```js
-export default tseslint.config([
-	globalIgnores(["dist"]),
-	{
-		files: ["**/*.{ts,tsx}"],
-		extends: [
-			// Other configs...
-
-			// Remove tseslint.configs.recommended and replace with this
-			...tseslint.configs.recommendedTypeChecked,
-			// Alternatively, use this for stricter rules
-			...tseslint.configs.strictTypeChecked,
-			// Optionally, add this for stylistic rules
-			...tseslint.configs.stylisticTypeChecked,
-
-			// Other configs...
-		],
-		languageOptions: {
-			parserOptions: {
-				project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-				tsconfigRootDir: import.meta.dirname,
-			},
-			// other options...
-		},
-	},
-]);
+```bash
+git clone https://github.com/AlfredoJSpera/react-vite-ts-template.git my-app
+cd my-app
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+> [!TIP]
+> Or click the "Use this template" button on the repository page on GitHub.
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+### 2. Install dependencies
 
-export default tseslint.config([
-	globalIgnores(["dist"]),
-	{
-		files: ["**/*.{ts,tsx}"],
-		extends: [
-			// Other configs...
-			// Enable lint rules for React
-			reactX.configs["recommended-typescript"],
-			// Enable lint rules for React DOM
-			reactDom.configs.recommended,
-		],
-		languageOptions: {
-			parserOptions: {
-				project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-				tsconfigRootDir: import.meta.dirname,
-			},
-			// other options...
-		},
-	},
-]);
+```bash
+npm install
 ```
+
+### 3. Start the development server
+
+```bash
+npm run dev
+```
+
+This will launch Vite in development mode with hot reloading.
+
+## Build
+
+### Standard build
+
+```bash
+npm run build
+```
+
+Compiles the app into the `dist/` folder.
+
+### Build & package as Firefox extension
+
+```bash
+npm run build:xpi
+```
+
+-   Runs the production build
+-   Zips the contents of `dist/` into `extension.xpi`
+
+> [!NOTE]
+> The `public/manifest.json` can be edited as needed to create the extension.
+
+## Using as a Firefox Extension
+
+### As a temporary extension
+
+1. Download the packaged `extension.xpi`
+2. Open Firefox and navigate to:
+
+    ```
+    about:debugging#/runtime/this-firefox
+    ```
+
+3. Click **"Load Temporary Add-on"**
+4. Select `extension.xpi`
+
+### As a fully installed extension
+
+> [!WARNING] WIP
+
+## Dependencies
+
+-   [React 19](https://react.dev/)
+-   [Vite 7](https://vitejs.dev/)
+-   [TypeScript](https://www.typescriptlang.org/)
+-   [SWC](https://swc.rs/) (via `@vitejs/plugin-react-swc`)
+
+## License
+
+This template is provided as-is under the MIT license.
+Feel free to fork and customize it for your projects.
