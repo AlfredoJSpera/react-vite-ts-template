@@ -73,7 +73,8 @@ npm run build:xpi
 
 ### As a fully installed extension
 
-> [!WARNING] WIP
+> [!WARNING]
+> Currently WIP.
 
 ## Dependencies
 
