@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc -b && vite build",
+		"build:xpi": "npm run build && cd dist && zip -r ../extension.xpi *",
 		"lint": "eslint .",
 		"preview": "vite preview"
 	},
