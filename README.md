@@ -93,10 +93,15 @@ npm run build:xpi
 -   [TypeScript](https://www.typescriptlang.org/)
 -   [SWC](https://swc.rs/) (via `@vitejs/plugin-react-swc`)
 
+## How to add a theme
+
+-   Add the theme as CSS variables in `src/theme/predefined-themes.css`
+-   Add the name of the new theme in the PREDEFINED_THEME_NAMES array in `src/theme/theme.ts`
+
 ## How to use the Theme Manager Hook
 
-The `useTheme` hook should be called only once in the app, preferably in a component to switch theme.
-See the file `src/components/ThemeSwitcher.tsx` to see an example of usage.
+The `useTheme` hook should be called only once in the app, preferably in a component to switch the theme.
+See `src/components/ThemeSwitcher.tsx` or `src/components/ThemeSwitcherWithoutCustom.tsx` for an example of usage.
 
 You can:
 
