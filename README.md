@@ -9,16 +9,6 @@ This repository is a **template project** for quickly bootstrapping a React appl
 -   Built-in **theme management** (persisted custom user-defined themes) and a fix for the [flash of unstyled content](https://en.wikipedia.org/wiki/Flash_of_unstyled_content) issue
 -   Ready-to-package as a **Firefox extension (.xpi)**
 
-## TODO
-
--   [x] Set up Vite
--   [x] Local Storage State manager
--   [x] Theme manager
--   [x] Flash of Unstyled Content fix
--   [x] Firefox-ready
--   [x] Remove custom theme
--   [ ] Settings JSON downloader/importer
-
 ## Getting Started
 
 ### 1. Clone the template
@@ -96,7 +86,7 @@ npm run build:xpi
 ## How to add a theme
 
 -   Add the theme as CSS variables in `src/theme/predefined-themes.css`
--   Add the name of the new theme in the PREDEFINED_THEME_NAMES array in `src/theme/theme.ts`
+-   Add the name of the new theme in the **`PREDEFINED_THEME_NAMES`** array in `src/theme/theme.ts`
 
 ## How to use the Theme Manager Hook
 
