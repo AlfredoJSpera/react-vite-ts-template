@@ -3,6 +3,23 @@ import useLocalStorageAsState from "./useLocalStorageAsState";
 import { Theme } from "../theme/theme";
 import { DEFAULT_THEME } from "../theme/theme";
 
+interface UseThemeResult {
+	/** The currently active theme object. */
+	currentTheme: Theme;
+
+	/** A function to apply a new theme. */
+	applyNewCurrentTheme: (theme: Theme) => void;
+
+	/** An array of all saved custom themes. */
+	customThemes: Theme[];
+
+	/** A function to save a new custom theme. */
+	saveCustomTheme: (
+		name: string,
+		customVariables: Record<string, string>
+	) => void;
+}
+
 /**
  * A hook for managing the application's theme, including saving and applying custom themes.
  * It stores the current theme and a list of custom themes in local storage.
@@ -12,19 +29,7 @@ import { DEFAULT_THEME } from "../theme/theme";
  * @returns return.customThemes An array of saved custom themes.
  * @returns return.saveCustomTheme A function to save a new custom theme.
  */
-export function useTheme(): {
-	/** The currently active theme object. */
-	currentTheme: Theme;
-	/** A function to apply a new theme. */
-	applyNewCurrentTheme: (theme: Theme) => void;
-	/** An array of all saved custom themes. */
-	customThemes: Theme[];
-	/** A function to save a new custom theme. */
-	saveCustomTheme: (
-		name: string,
-		customVariables: Record<string, string>
-	) => void;
-} {
+export function useTheme(): UseThemeResult {
 	const [currentTheme, setCurrentTheme] = useLocalStorageAsState<Theme>(
 		"theme",
 		DEFAULT_THEME

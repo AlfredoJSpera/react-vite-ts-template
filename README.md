@@ -16,6 +16,7 @@ This repository is a **template project** for quickly bootstrapping a React appl
 -   [x] Theme manager
 -   [x] Flash of Unstyled Content fix
 -   [x] Firefox-ready
+-   [ ] Remove custom theme
 -   [ ] Settings JSON downloader/importer
 
 ## Getting Started
@@ -91,6 +92,19 @@ npm run build:xpi
 -   [Vite 7](https://vitejs.dev/)
 -   [TypeScript](https://www.typescriptlang.org/)
 -   [SWC](https://swc.rs/) (via `@vitejs/plugin-react-swc`)
+
+## How does the theme manager works
+
+```mermaid
+flowchart TD
+    A[Visit Website] --> B[theme-loader.js runs before React]
+	B --> C{localStorage has theme?}
+	C -- No --> D[Fallback: predefined-themes.css :root theme]
+    C -- Yes --> E[Set data-theme attribute on the html tag]
+	D --> F[Styled DOM before React loads]
+	E --> F
+	F --> G[React App mounts with correct theme]
+```
 
 ## License
 

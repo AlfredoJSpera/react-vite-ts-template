@@ -10,6 +10,7 @@ export default function ThemeSwitcher() {
 		saveCustomTheme,
 	} = useTheme();
 
+	// States for the new theme form
 	const [newThemeName, setNewThemeName] = useState("");
 	const [bg, setBg] = useState("#ffffff");
 	const [text, setText] = useState("#000000");
@@ -24,7 +25,7 @@ export default function ThemeSwitcher() {
 			"--color-text": text,
 			"--color-heading": text,
 			"--color-card-bg": bg,
-			"--color-border": text + "4d", // A translucent version
+			"--color-border": text + "4d",
 			"--color-button-bg": text,
 			"--color-button-bg-hover": text + "cc",
 			"--color-button-text": bg,
