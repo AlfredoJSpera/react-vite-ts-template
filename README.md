@@ -104,10 +104,14 @@ You can:
 -   Save/Edit/Delete custom themes (**optional**)
 
 > [NOTE]
-> If you don't want or need custom theming, you should delete all lines marked from `//! Delete if unnecessary` to `//! ---------------------` in these files:
+> If you don't want or need custom theming, you should:
 >
-> -   `src/hooks/useTheme.ts`
-> -   `public/theme-loader.js`
+> -   Be sure to clear the localStorage for the webapp
+> -   Delete the `src/hooks/useTheme.ts` hook
+> -   Delete the `src/components/ThemeSwitcher.tsx` component
+> -   Use (and rename if necessary) the `src/hooks/useThemeWithoutCustom.ts` hook
+> -   Use (and rename if necessary) the `src/components/ThemeSwitcherWithoutCustom.tsx` component
+> -   Delete all lines marked from `//! Custom Theme Only` to `//! ---------------------` in `public/theme-loader.js`
 
 ## How the Flash of Unstyled Content fix works
 

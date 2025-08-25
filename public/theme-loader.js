@@ -14,7 +14,7 @@
 					parsed.name
 				);
 
-				//! Delete if unnecessary
+				//! Custom Theme Only
 				// Apply any CSS variables in the theme if it is a custom one
 				if (parsed.customVariables) {
 					for (const [key, value] of Object.entries(
