@@ -95,13 +95,19 @@ npm run build:xpi
 
 ## How to use the Theme Manager Hook
 
-See the file `src/components/ThemeSwitcher.tsx` to see an example of usage.
 The `useTheme` hook should be called only once in the app, preferably in a component to switch theme.
+See the file `src/components/ThemeSwitcher.tsx` to see an example of usage.
 
 You can:
 
 -   Switch to another theme
 -   Save/Edit/Delete custom themes (**optional**)
+
+> [NOTE]
+> If you don't want or need custom theming, you should delete all lines marked from `//! Delete if unnecessary` to `//! ---------------------` in these files:
+>
+> -   `src/hooks/useTheme.ts`
+> -   `public/theme-loader.js`
 
 ## How the Flash of Unstyled Content fix works
 

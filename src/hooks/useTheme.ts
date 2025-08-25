@@ -5,6 +5,8 @@ import { Theme, DEFAULT_THEME } from "../theme/theme";
 interface UseThemeResult {
 	currentTheme: Theme;
 	applyNewCurrentTheme: (theme: Theme) => void;
+
+	//! Delete if unnecessary
 	customThemes: Theme[];
 	saveCustomTheme: (
 		name: string,
@@ -15,8 +17,10 @@ interface UseThemeResult {
 		customVariables: Record<string, string>
 	) => void;
 	deleteCustomTheme: (name: string) => void;
+	//! ---------------------
 }
 
+//! Delete if unnecessary
 /** Applies custom CSS variables to the document's HTML element. */
 function setCustomVariables(variables: Record<string, string>) {
 	for (const [key, value] of Object.entries(variables)) {
@@ -28,17 +32,10 @@ function setCustomVariables(variables: Record<string, string>) {
 function resetCustomVariables() {
 	document.documentElement.removeAttribute("style");
 }
+//! ---------------------
 
 /**
- * A hook for managing the application's theme, including saving and applying custom themes.
- * It stores the current theme and a list of custom themes in local storage.
- *
- * @returns return.theme The currently active theme object.
- * @returns return.applyNewCurrentTheme A function to apply a new theme.
- * @returns return.customThemes An array of saved custom themes.
- * @returns return.saveCustomTheme A function to save a new custom theme.
- * @returns return.editCustomTheme A function to edit a custom theme.
- * @returns return.deleteCustomTheme A function to delete a custom theme.
+ * A hook for managing the application's theme, by storing information in the localStorage.
  */
 export function useTheme(): UseThemeResult {
 	const [currentTheme, setCurrentTheme] = useLocalStorageState<Theme>(
@@ -46,23 +43,28 @@ export function useTheme(): UseThemeResult {
 		DEFAULT_THEME
 	);
 
+	//! Delete if unnecessary
 	const [customThemes, setCustomThemes] = useLocalStorageState<Theme[]>(
 		"customThemes",
 		[]
 	);
+	//! ---------------------
 
 	// Synchronize the theme state with the DOM when the theme changes
 	useEffect(() => {
 		document.documentElement.setAttribute("data-theme", currentTheme.name);
 
+		//! Delete if unnecessary
 		if (currentTheme.customVariables) {
 			setCustomVariables(currentTheme.customVariables);
 		} else {
 			// Remove any inline styles that might have been applied by custom themes
 			resetCustomVariables();
 		}
+		//! ---------------------
 	}, [currentTheme]);
 
+	//! Delete if unnecessary
 	const saveCustomTheme = useCallback(
 		(name: string, customVariables: Record<string, string>) => {
 			const newTheme: Theme = { name, customVariables };
@@ -105,6 +107,7 @@ export function useTheme(): UseThemeResult {
 		},
 		[setCustomThemes, setCurrentTheme, currentTheme]
 	);
+	//! ---------------------
 
 	const applyNewCurrentTheme = useCallback(
 		(newCurrentTheme: Theme) => {
@@ -116,9 +119,11 @@ export function useTheme(): UseThemeResult {
 	return {
 		currentTheme,
 		applyNewCurrentTheme,
+		//! Delete if unnecessary
 		customThemes,
 		saveCustomTheme,
 		editCustomTheme,
 		deleteCustomTheme,
+		//! ---------------------
 	};
 }
