@@ -8,9 +8,11 @@ export default function ThemeSwitcher() {
 		applyNewCurrentTheme,
 		customThemes,
 		saveCustomTheme,
+		editCustomTheme,
+		deleteCustomTheme,
 	} = useTheme();
 
-	// States for the new theme form
+	// States for the new/edit theme form
 	const [newThemeName, setNewThemeName] = useState("");
 	const [bg, setBg] = useState("#ffffff");
 	const [text, setText] = useState("#000000");
@@ -20,6 +22,7 @@ export default function ThemeSwitcher() {
 			alert("Please enter a theme name.");
 			return;
 		}
+
 		saveCustomTheme(newThemeName, {
 			"--color-bg": bg,
 			"--color-text": text,
@@ -32,7 +35,29 @@ export default function ThemeSwitcher() {
 			"--color-button-border": text,
 			"--color-input-bg": bg,
 		});
+
 		setNewThemeName("");
+	};
+
+	const handleEditTheme = (themeName: string) => {
+		editCustomTheme(themeName, {
+			"--color-bg": bg,
+			"--color-text": text,
+			"--color-heading": text,
+			"--color-card-bg": bg,
+			"--color-border": text + "4d",
+			"--color-button-bg": text,
+			"--color-button-bg-hover": text + "cc",
+			"--color-button-text": bg,
+			"--color-button-border": text,
+			"--color-input-bg": bg,
+		});
+	};
+
+	const handleDeleteTheme = (themeName: string) => {
+		if (confirm(`Are you sure you want to delete theme "${themeName}"?`)) {
+			deleteCustomTheme(themeName);
+		}
 	};
 
 	return (
@@ -42,28 +67,49 @@ export default function ThemeSwitcher() {
 			<div>
 				<h3>Default themes</h3>
 				<div className="button-group">
-					{PREDEFINED_THEME_NAMES.map((t) => (
-						<button
-							key={t}
-							onClick={() => applyNewCurrentTheme({ name: t })}
-						>
-							{t}
-						</button>
-					))}
+					{PREDEFINED_THEME_NAMES.map((themeName) => {
+						return (
+							<button
+								key={themeName}
+								onClick={() =>
+									applyNewCurrentTheme({ name: themeName })
+								}
+							>
+								{themeName}
+							</button>
+						);
+					})}
 				</div>
 			</div>
 
 			<div>
 				<h3>Custom themes</h3>
 				<div className="button-group">
-					{customThemes.map((t) => (
-						<button
-							key={t.name}
-							onClick={() => applyNewCurrentTheme(t)}
-						>
-							{t.name}
-						</button>
-					))}
+					{customThemes.map((theme) => {
+						return (
+							<div key={theme.name} className="custom-theme-item">
+								<button
+									onClick={() => applyNewCurrentTheme(theme)}
+								>
+									{theme.name}
+								</button>
+								<button
+									onClick={() => handleEditTheme(theme.name)}
+									title={"Edit " + theme.name}
+								>
+									E
+								</button>
+								<button
+									onClick={() =>
+										handleDeleteTheme(theme.name)
+									}
+									title={"Delete " + theme.name}
+								>
+									D
+								</button>
+							</div>
+						);
+					})}
 				</div>
 			</div>
 

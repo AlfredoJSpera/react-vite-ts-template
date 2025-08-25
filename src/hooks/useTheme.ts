@@ -1,23 +1,32 @@
 import { useCallback, useEffect } from "react";
-import useLocalStorageAsState from "./useLocalStorageAsState";
-import { Theme } from "../theme/theme";
-import { DEFAULT_THEME } from "../theme/theme";
+import useLocalStorageState from "./useLocalStorageState";
+import { Theme, DEFAULT_THEME } from "../theme/theme";
 
 interface UseThemeResult {
-	/** The currently active theme object. */
 	currentTheme: Theme;
-
-	/** A function to apply a new theme. */
 	applyNewCurrentTheme: (theme: Theme) => void;
-
-	/** An array of all saved custom themes. */
 	customThemes: Theme[];
-
-	/** A function to save a new custom theme. */
 	saveCustomTheme: (
 		name: string,
 		customVariables: Record<string, string>
 	) => void;
+	editCustomTheme: (
+		name: string,
+		customVariables: Record<string, string>
+	) => void;
+	deleteCustomTheme: (name: string) => void;
+}
+
+/** Applies custom CSS variables to the document's HTML element. */
+function setCustomVariables(variables: Record<string, string>) {
+	for (const [key, value] of Object.entries(variables)) {
+		document.documentElement.style.setProperty(key, value);
+	}
+}
+
+/** Removes custom CSS variables from the document's HTML element. */
+function resetCustomVariables() {
+	document.documentElement.removeAttribute("style");
 }
 
 /**
@@ -28,50 +37,32 @@ interface UseThemeResult {
  * @returns return.applyNewCurrentTheme A function to apply a new theme.
  * @returns return.customThemes An array of saved custom themes.
  * @returns return.saveCustomTheme A function to save a new custom theme.
+ * @returns return.editCustomTheme A function to edit a custom theme.
+ * @returns return.deleteCustomTheme A function to delete a custom theme.
  */
 export function useTheme(): UseThemeResult {
-	const [currentTheme, setCurrentTheme] = useLocalStorageAsState<Theme>(
+	const [currentTheme, setCurrentTheme] = useLocalStorageState<Theme>(
 		"theme",
 		DEFAULT_THEME
 	);
-	const [customThemes, setCustomThemes] = useLocalStorageAsState<Theme[]>(
+
+	const [customThemes, setCustomThemes] = useLocalStorageState<Theme[]>(
 		"customThemes",
 		[]
 	);
 
-	/**
-	 * Applies custom CSS variables to the document's HTML element.
-	 *
-	 * @param customVariables - An object mapping CSS variable names to their values.
-	 */
-	const applyCustomVariables = useCallback(
-		(customVariables: Record<string, string>) => {
-			for (const [key, value] of Object.entries(customVariables)) {
-				document.documentElement.style.setProperty(key, value);
-			}
-		},
-		[]
-	);
-
-	// Synchronize the theme state with the DOM.
-	// This effect runs whenever `currentTheme` changes.
+	// Synchronize the theme state with the DOM when the theme changes
 	useEffect(() => {
 		document.documentElement.setAttribute("data-theme", currentTheme.name);
 
 		if (currentTheme.customVariables) {
-			applyCustomVariables(currentTheme.customVariables);
+			setCustomVariables(currentTheme.customVariables);
 		} else {
-			// If the theme is a default one, remove any inline styles
-			// that might have been applied by custom themes.
-			document.documentElement.removeAttribute("style");
+			// Remove any inline styles that might have been applied by custom themes
+			resetCustomVariables();
 		}
-	}, [currentTheme, applyCustomVariables]);
+	}, [currentTheme]);
 
-	/**
-	 * Saves a new custom theme to local storage.
-	 * @param name The name of the new custom theme.
-	 * @param customVariables The CSS variables for the theme.
-	 */
 	const saveCustomTheme = useCallback(
 		(name: string, customVariables: Record<string, string>) => {
 			const newTheme: Theme = { name, customVariables };
@@ -80,11 +71,41 @@ export function useTheme(): UseThemeResult {
 		[setCustomThemes]
 	);
 
-	/**
-	 * Applies a specified theme to the application.
-	 * This updates the `currentTheme` state, triggering an update of the DOM.
-	 * @param theme The theme object to apply.
-	 */
+	const editCustomTheme = useCallback(
+		(name: string, customVariables: Record<string, string>) => {
+			setCustomThemes((prev) =>
+				// Create a new array of themes with the selected theme edited
+				prev.map((theme) => {
+					if (theme.name === name) {
+						return { ...theme, customVariables };
+					}
+					return theme;
+				})
+			);
+
+			// If editing the current theme, update it too
+			if (currentTheme.name === name) {
+				setCurrentTheme({ name, customVariables });
+			}
+		},
+		[setCustomThemes, setCurrentTheme, currentTheme]
+	);
+
+	const deleteCustomTheme = useCallback(
+		(name: string) => {
+			setCustomThemes((prev) =>
+				// Create a new array of themes without the selected theme
+				prev.filter((theme) => theme.name !== name)
+			);
+
+			// If deleting the current theme, fall back to DEFAULT_THEME
+			if (currentTheme.name === name) {
+				setCurrentTheme(DEFAULT_THEME);
+			}
+		},
+		[setCustomThemes, setCurrentTheme, currentTheme]
+	);
+
 	const applyNewCurrentTheme = useCallback(
 		(newCurrentTheme: Theme) => {
 			setCurrentTheme(newCurrentTheme);
@@ -97,5 +118,7 @@ export function useTheme(): UseThemeResult {
 		applyNewCurrentTheme,
 		customThemes,
 		saveCustomTheme,
+		editCustomTheme,
+		deleteCustomTheme,
 	};
 }

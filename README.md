@@ -93,7 +93,17 @@ npm run build:xpi
 -   [TypeScript](https://www.typescriptlang.org/)
 -   [SWC](https://swc.rs/) (via `@vitejs/plugin-react-swc`)
 
-## How does the theme manager works
+## How to use the Theme Manager Hook
+
+See the file `src/components/ThemeSwitcher.tsx` to see an example of usage.
+The `useTheme` hook should be called only once in the app, preferably in a component to switch theme.
+
+You can:
+
+-   Switch to another theme
+-   Save/Edit/Delete custom themes (**optional**)
+
+## How the Flash of Unstyled Content fix works
 
 ```mermaid
 flowchart TD

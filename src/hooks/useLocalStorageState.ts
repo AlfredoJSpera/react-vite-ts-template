@@ -10,7 +10,7 @@ import { useState, useEffect, Dispatch, SetStateAction } from "react";
  * @param initialValue The initial value to use if no value is found in localStorage.
  * @returns A tuple containing the current state value and a function to update it.
  */
-function useLocalStorageAsState<T>(
+function useLocalStorageState<T>(
 	key: string,
 	initialValue: T
 ): [T, Dispatch<SetStateAction<T>>] {
@@ -42,4 +42,4 @@ function useLocalStorageAsState<T>(
 	return [value, setValue] as const;
 }
 
-export default useLocalStorageAsState;
+export default useLocalStorageState;
