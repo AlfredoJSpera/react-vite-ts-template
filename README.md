@@ -117,13 +117,12 @@ You can:
 
 ```mermaid
 flowchart TD
-    A[Visit Website] --> B[theme-loader.js runs before React]
+    A[Visit Website] --> B[theme-loader.js runs in index.html before React]
 	B --> C{localStorage has theme?}
 	C -- No --> D[Fallback: predefined-themes.css :root theme]
-    C -- Yes --> E[Set data-theme attribute on the html tag]
-	D --> F[Styled DOM before React loads]
+    C -- Yes --> E[Set data-theme attribute and eventual custom styles on the html tag]
+	D --> F[DOM is Styled before React is mounted]
 	E --> F
-	F --> G[React App mounts with correct theme]
 ```
 
 ## License
