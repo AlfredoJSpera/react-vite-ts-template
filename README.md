@@ -16,7 +16,7 @@ This repository is a **template project** for quickly bootstrapping a React appl
 -   [x] Theme manager
 -   [x] Flash of Unstyled Content fix
 -   [x] Firefox-ready
--   [ ] Remove custom theme
+-   [x] Remove custom theme
 -   [ ] Settings JSON downloader/importer
 
 ## Getting Started
@@ -103,7 +103,7 @@ You can:
 -   Switch to another theme
 -   Save/Edit/Delete custom themes (**optional**)
 
-> [NOTE]
+> ![NOTE]
 > If you don't want or need custom theming, you should:
 >
 > -   Be sure to clear the localStorage for the webapp
