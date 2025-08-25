@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTheme } from "../hooks/useTheme";
-import { PREDEFINED_THEME_NAMES } from "./theme";
+import { PREDEFINED_THEME_NAMES } from "../theme/theme";
 
 export default function ThemeSwitcher() {
 	const {

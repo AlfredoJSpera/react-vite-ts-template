@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./css/App.css";
-import ThemeSwitcher from "./theme/ThemeSwitcher";
+import ThemeSwitcher from "./components/ThemeSwitcher";
 import ThemeButton from "./components/ThemeButton";
 
 export default function App() {
