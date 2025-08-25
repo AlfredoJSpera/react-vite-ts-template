@@ -103,7 +103,7 @@ You can:
 -   Switch to another theme
 -   Save/Edit/Delete custom themes (**optional**)
 
-> ![NOTE]
+> [!NOTE]
 > If you don't want or need custom theming, you should:
 >
 > -   Be sure to clear the localStorage for the webapp
