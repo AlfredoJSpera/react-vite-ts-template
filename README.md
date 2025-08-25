@@ -1,12 +1,12 @@
 # react-vite-ts-template
 
-This repository is a **template project** for quickly bootstrapping a modern React application using **TypeScript**, **Vite**, and **SWC**.
+This repository is a **template project** for quickly bootstrapping a React application using **TypeScript**, **Vite**, and **SWC**.
 
 ## Features
 
 -   **Vite 7 + SWC** for fast builds and hot module replacement
 -   **React 19** with **TypeScript** typings
--   Built-in **theme management** (theme switcher + persisted custom user-defined themes) and a fix for the [flash of unstyled content](https://en.wikipedia.org/wiki/Flash_of_unstyled_content) issue
+-   Built-in **theme management** (persisted custom user-defined themes) and a fix for the [flash of unstyled content](https://en.wikipedia.org/wiki/Flash_of_unstyled_content) issue
 -   Ready-to-package as a **Firefox extension (.xpi)**
 
 ## TODO
@@ -16,7 +16,7 @@ This repository is a **template project** for quickly bootstrapping a modern Rea
 -   [x] Theme manager
 -   [x] Flash of Unstyled Content fix
 -   [x] Firefox-ready
--   [ ] Settings JSON downloader
+-   [ ] Settings JSON downloader/importer
 
 ## Getting Started
 
