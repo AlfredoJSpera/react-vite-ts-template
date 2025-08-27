@@ -57,11 +57,29 @@ npm run build:xpi
 > [!NOTE]
 > The `public/manifest.json` can be edited as needed to create the extension.
 
-## Using as a Firefox Extension
+## Using the app as a Firefox Extension
 
-### As a temporary extension
+> [!NOTE]
+> If you don't want or need to use the app as an extension:
+>
+> -   Delete the `src/hooks/useContentScriptMessage.ts` hook
+> -   Delete the `src/components/DisplayH1sInPage.tsx` component
+> -   Delete the `src/types/contentScriptTypes.ts` file
+> -   Delete the `src/contentScript.ts` file
+> -   Delete the `public/manifest.json` file
+> -   Execute `npm remove @types/firefox-webext-browser`
+> -   Delete all lines marked from `//! Browser Content Script Only` to `//! ---------------------` in `vite.config.ts`
 
-1. Download the packaged `extension.xpi`
+### Content Script
+
+The `useContentScriptMessage` hook sends and receives messages to and from the `src/contentScript.ts` file.
+For an example of usage, see `src/components/DisplayH1sInPage.tsx`. For more information on content scripts, see [here](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Content_scripts).
+
+### Loading the app as a temporary extension
+
+#### With the .xpi
+
+1. Run `build:xpi` to obtain the `extension.xpi`
 2. Open Firefox and navigate to:
 
     ```
@@ -71,17 +89,17 @@ npm run build:xpi
 3. Click **"Load Temporary Add-on"**
 4. Select `extension.xpi`
 
-### As a fully installed extension
+#### With the /dist directory
 
-> [!WARNING]
-> Currently WIP.
+1. Run `build` to create the `/dist` directory
+2. Open Firefox and navigate to:
 
-## Dependencies
+    ```
+    about:debugging#/runtime/this-firefox
+    ```
 
--   [React 19](https://react.dev/)
--   [Vite 7](https://vitejs.dev/)
--   [TypeScript](https://www.typescriptlang.org/)
--   [SWC](https://swc.rs/) (via `@vitejs/plugin-react-swc`)
+3. Click **"Load Temporary Add-on"**
+4. Select any file in the `/dist` directory, for example `manifest.json`
 
 ## How to add a theme
 

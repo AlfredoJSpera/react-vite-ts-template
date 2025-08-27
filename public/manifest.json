@@ -20,5 +20,12 @@
 		},
 		"default_popup": "index.html",
 		"default_title": "React powered Popup"
-	}
+	},
+	"permissions": [],
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"js": ["contentScript.js"]
+		}
+	]
 }
