@@ -18,7 +18,7 @@ browser.runtime.onMessage.addListener(
 	) => {
 		if (msg.type === "GET_HEADER") {
 			const text = getHeaderText();
-			// Set an error here to use the `error` from `useContentScriptMessage`
+			// Set an error here to make the `sendContentScriptMessage` function throw the error
 			sendResponse({ data: text });
 		}
 		return true;

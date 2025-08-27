@@ -62,8 +62,8 @@ npm run build:xpi
 > [!NOTE]
 > If you don't want or need to use the app as an extension:
 >
-> -   Delete the `src/hooks/useContentScriptMessage.ts` hook
 > -   Delete the `src/components/DisplayH1sInPage.tsx` component
+> -   Delete the `src/utils/sendContentScriptMessage.ts` file
 > -   Delete the `src/types/contentScriptTypes.ts` file
 > -   Delete the `src/contentScript.ts` file
 > -   Delete the `public/manifest.json` file
@@ -72,7 +72,7 @@ npm run build:xpi
 
 ### Content Script
 
-The `useContentScriptMessage` hook sends and receives messages to and from the `src/contentScript.ts` file.
+The `sendContentScriptMessage` function sends and receives messages to and from the `src/contentScript.ts` file.
 For an example of usage, see `src/components/DisplayH1sInPage.tsx`. For more information on content scripts, see [here](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Content_scripts).
 
 ### Loading the app as a temporary extension

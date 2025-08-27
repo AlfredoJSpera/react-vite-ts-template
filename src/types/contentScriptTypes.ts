@@ -6,6 +6,6 @@ export interface ContentScriptMessage {
 }
 
 export interface ContentScriptResponse {
-	data?: unknown; // Insert your type instead of unknown if you plan to return a complex object
+	data?: string | null; // Insert your type here if you plan to return a complex object
 	error?: string;
 }

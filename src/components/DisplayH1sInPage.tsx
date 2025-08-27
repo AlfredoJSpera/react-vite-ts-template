@@ -1,38 +1,54 @@
-import { useContentScriptMessage } from "../hooks/useContentScriptMessage";
+import { useEffect, useState } from "react";
+import { sendContentScriptMessage } from "../utils/sendContentScriptMessage";
 
 function DisplayH1sInPage() {
-	const { data, loading, error } = useContentScriptMessage(
-		{ type: "GET_HEADER" },
-		{ data: "No header found" }
-	);
+	const [headerText, setHeaderText] = useState<string | null>(null);
+	const [error, setError] = useState("");
 
-	if (loading) {
-		return <div>Searching for the header...</div>;
-	}
+	useEffect(() => {
+		const sendMessage = async () => {
+			try {
+				const response = await sendContentScriptMessage({
+					type: "GET_HEADER",
+				});
 
-	if (error) {
-		return (
-			<>
-				<div>Error while searching for the header: {error}</div>
-				<i>
-					Install the app as an extension and open the popup in a page
-					to see it work.
-				</i>
-			</>
-		);
-	}
+				if (response.data) {
+					setHeaderText(response.data);
+				}
+			} catch (error) {
+				if (error instanceof Error) {
+					setError(error.message);
+				} else {
+					setError("An unknown error occurred");
+				}
+			}
+		};
 
-	if (typeof data.data === "string") {
-		return (
-			<div>
-				Header found: <code>{data.data}</code>
+		sendMessage();
+	}, []);
+
+	return (
+		<div>
+			<h3>Test content script</h3>
+			<div style={{ marginBottom: "1em" }}>
+				{error && (
+					<div>
+						<p>Error: {error}</p>{" "}
+						<i>
+							Install the app as an extension and open the popup
+							in a page to see it work.
+						</i>
+					</div>
+				)}
+				{!error && headerText === null && (
+					<p>
+						<i>Header not found</i>
+					</p>
+				)}
+				{!error && headerText && <p>Header: {headerText}</p>}
 			</div>
-		);
-	} else if (data.data === null) {
-		return <div>No header found</div>;
-	} else {
-		return <div>Unknown "GET_HEADER" response type</div>;
-	}
+		</div>
+	);
 }
 
 export default DisplayH1sInPage;
