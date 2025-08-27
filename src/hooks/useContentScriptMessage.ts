@@ -6,6 +6,10 @@ import {
 
 /**
  * A hook for sending and receiving messages from the contentScript on the page.
+ *
+ * @param message The message to send
+ * @param initialValue The initial value of the response from the content script
+ * @returns The response, if the content script is loading the response and an error
  */
 export function useContentScriptMessage(
 	message: ContentScriptMessage,
