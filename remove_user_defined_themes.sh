@@ -34,6 +34,7 @@ if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
 	exit 1
 fi
 
+#? MANUAL CHANGES: Replace these files with their counterpart without custom themes in the /WithoutCustomThemes directories
 replace_files ./public theme-loader.js
 replace_files ./src/components ThemeSwitcher.tsx
 replace_files ./src/hooks useTheme.ts
@@ -41,6 +42,7 @@ replace_files ./src/hooks useThemeContext.ts
 replace_files ./src/theme ThemeContext.ts
 replace_files ./src/theme ThemeProvider.tsx
 
+#? MANUAL CHANGES: Update imports for all changed files (remove one `../` and `WithoutCustomThemes/` from imports)
 for file in "${replaced_files[@]}"; do
 	# Regex for the imports:
 	# `../../*;` --> `../*;`

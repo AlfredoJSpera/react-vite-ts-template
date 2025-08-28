@@ -58,17 +58,6 @@ npm run build:xpi
 
 ## Using the app as a Firefox extension
 
-> [!NOTE]
-> If you don't want or need to use the app as an extension:
->
-> -   Delete the `src/components/DisplayH1sInPage.tsx` component
-> -   Delete the `src/utils/sendContentScriptMessage.ts` file
-> -   Delete the `src/types/contentScriptTypes.ts` file
-> -   Delete the `src/contentScript.ts` file
-> -   Delete the `public/manifest.json` file
-> -   Execute `npm remove @types/firefox-webext-browser`
-> -   Delete all lines marked from `//! Browser Content Script Only` to `//! ---------------------` in `vite.config.ts`
-
 ### Extension manifest
 
 The manifest file `public/manifest.json` can be edited as needed to create the extension.
@@ -108,6 +97,10 @@ The `sendContentScriptMessage` function sends and receives messages to and from 
 
 3. Click **"Load Temporary Add-on"**
 4. Select `extension.xpi`
+
+### How to remove extension functionality
+
+Run the `remove_firefox_extension.sh` executable.
 
 ## Themes
 
