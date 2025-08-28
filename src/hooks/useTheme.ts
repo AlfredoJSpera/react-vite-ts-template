@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from "react";
-import useLocalStorageState from "./useLocalStorageState";
 import { Theme, DEFAULT_THEME } from "../theme/theme";
+import { useLocalStorage } from "@uidotdev/usehooks";
 
 interface UseThemeResult {
 	currentTheme: Theme;
@@ -35,12 +35,12 @@ function resetCustomVariables() {
  * **Supports custom themes**.
  */
 function useTheme(): UseThemeResult {
-	const [currentTheme, setCurrentTheme] = useLocalStorageState<Theme>(
+	const [currentTheme, setCurrentTheme] = useLocalStorage<Theme>(
 		"theme",
 		DEFAULT_THEME
 	);
 
-	const [customThemes, setCustomThemes] = useLocalStorageState<Theme[]>(
+	const [customThemes, setCustomThemes] = useLocalStorage<Theme[]>(
 		"customThemes",
 		[]
 	);
