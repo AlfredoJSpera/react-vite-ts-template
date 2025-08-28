@@ -8,43 +8,67 @@ A small template for a **React** + **Vite** + **TypeScript** app that can run as
 
 -   Theme system with predefined themes
 -   Custom themes defined at runtime (by the user, for example) saved in localStorage and applied as CSS variables
-    -   Theme hook
-    -   Theme Context helper
-    -   Theme Provider
-    -   [Example of a component using these](src/components/ThemeSwitcher.tsx)
+-   Theme hook, context helper and provider ([example of a component using these](src/components/ThemeSwitcher.tsx))
 -   "Without custom themes" alternate implementation (lighter, only predefined themes)
--   Early theme application before React mounts
+-   Early theme application before React mounts for the FOUC fix
 
 ### Firefox Extension
 
--   Content script:
-    -   Message sender util for communication between content script and React app
-    -   [Example of a component using it](src/components/DisplayH1InPage.tsx)
--   Vite config includes a content-script build entry
 -   Extension manifest
+-   Content script
+-   Message sender function for communication between content script and React app ([example of a component using it](src/components/DisplayH1InPage.tsx))
+-   Vite config includes a content-script build entry
 
 ## Quick start
 
+### Clone the repository
+
+```bash
+git clone https://github.com/AlfredoJSpera/react-vite-ts-template.git my-app
+cd my-app
+```
+
+### Initial configuration script
+
+Run the [choose_project_configuration.sh](choose_project_configuration.sh) helper script; it automates **one-time** workspace configurations.
+
+#### Theme configuration
+
+> [!IMPORTANT]
+> There are two implementations for theming:
+>
+> -   **Full implementation**: both predefined and user-defined themes
+> -   **Only predefined themes**
+
+#### Other configurations
+
+-   Removes Firefox extension files (removes content-script, helper utilities and manifest, and updates imports)
+
+> [!WARNING]
+> The script deletes/moves files from fixed locations. Execute this script before applying changes.
+
+### Commands
+
 -   **Install dependencies**:
 
-    ```shell
+    ```bash
     npm install
     ```
 
 -   **Run in dev**:
 
-    ```shell
+    ```bash
     npm run dev
     ```
 
 -   **Build**:
 
-    ```shell
+    ```bash
     npm run build
     ```
 
 -   **Build XPI** (Firefox extension package):
-    ```shell
+    ```bash
     npm run build:xpi
     ```
 
@@ -54,15 +78,9 @@ Wrap your `App` component with [`ThemeProvider`](src/theme/ThemeProvider.tsx). F
 
 -   currentTheme
 -   applyNewCurrentTheme
--   custom theme functions (save/edit/delete) when using the full implementation
+-   functions to handle custom themes (save/edit/delete) when using the full implementation
 
 The project includes a [`ThemeSwitcher`](src/components/ThemeSwitcher.tsx) component to switch theme.
-
-> [!NOTE]
-> There are two implementations of the theme manager:
->
-> -   **Full implementation**: both predefined and user-defined themes
-> -   **Only predefined themes**
 
 ## Content script usage
 
@@ -72,17 +90,6 @@ The project includes a content script that reads the first H1 on the page and it
 
 > [!NOTE]
 > The content script can only run when the app is installed as an extension or when the content script is injected into a page. See [manifest.json](public/manifest.json).
-
-## Initial configuration script
-
-The [choose_project_configuration.sh](choose_project_configuration.sh) helper script automates one-time workspace configurations:
-
--   Option 1: keep both predefined and user-defined themes (removes the `WithoutCustomThemes` directories)
--   Option 2: use ONLY predefined themes (it replaces files from `WithoutCustomThemes` into the main locations)
--   Option 3: remove Firefox extension files (removes content-script, helper utilities and manifest, and updates imports)
-
-> [!WARNING]
-> The script deletes/moves files from fixed locations. Execute this script before applying changes.
 
 ## Load as a temporary Firefox extension
 
