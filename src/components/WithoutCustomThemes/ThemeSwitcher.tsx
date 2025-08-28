@@ -1,8 +1,8 @@
-import { PREDEFINED_THEME_NAMES } from "../theme/theme";
-import useThemeWithoutCustom from "../hooks/useThemeWithoutCustom";
+import { useThemeContext } from "../../hooks/WithoutCustomThemes/useThemeContext";
+import { PREDEFINED_THEME_NAMES } from "../../theme/themeConfigs";
 
-function ThemeSwitcherWithoutCustom() {
-	const { currentTheme, applyNewCurrentTheme } = useThemeWithoutCustom();
+function ThemeSwitcher() {
+	const { currentTheme, applyNewCurrentTheme } = useThemeContext();
 
 	return (
 		<div className="theme-container">
@@ -29,4 +29,4 @@ function ThemeSwitcherWithoutCustom() {
 	);
 }
 
-export default ThemeSwitcherWithoutCustom;
+export default ThemeSwitcher;

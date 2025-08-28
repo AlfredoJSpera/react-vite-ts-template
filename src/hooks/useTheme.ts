@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
-import { Theme, DEFAULT_THEME } from "../theme/theme";
+import { DEFAULT_THEME } from "../theme/themeConfigs";
+import { Theme } from "../types/Theme";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import { ThemeContextData } from "../theme/ThemeContext";
 

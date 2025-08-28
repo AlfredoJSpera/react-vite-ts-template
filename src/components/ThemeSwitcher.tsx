@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PREDEFINED_THEME_NAMES } from "../theme/theme";
+import { PREDEFINED_THEME_NAMES } from "../theme/themeConfigs";
 import { useThemeContext } from "../hooks/useThemeContext";
 
 function ThemeSwitcher() {

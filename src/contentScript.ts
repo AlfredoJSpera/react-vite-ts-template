@@ -1,7 +1,7 @@
 import {
 	ContentScriptMessage,
 	ContentScriptResponse,
-} from "./types/contentScriptTypes";
+} from "./types/ContentScript";
 
 console.log("Content script injected!");
 

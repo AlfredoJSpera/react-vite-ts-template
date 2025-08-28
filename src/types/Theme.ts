@@ -8,6 +8,3 @@ export interface Theme {
 	 */
 	customVariables?: Record<string, string>;
 }
-
-export const PREDEFINED_THEME_NAMES = ["light", "dark", "sepia"];
-export const DEFAULT_THEME: Theme = { name: "light" };

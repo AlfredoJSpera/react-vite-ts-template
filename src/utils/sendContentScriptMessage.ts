@@ -1,7 +1,7 @@
 import {
 	ContentScriptMessage,
 	ContentScriptResponse,
-} from "../types/contentScriptTypes";
+} from "../types/ContentScript";
 
 /**
  * Sends a message to the active content script and returns the response.

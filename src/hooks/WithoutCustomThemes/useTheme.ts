@@ -1,12 +1,13 @@
 import { useCallback, useEffect } from "react";
-import { Theme, DEFAULT_THEME } from "../theme/theme";
 import { useLocalStorage } from "@uidotdev/usehooks";
-import { ThemeContextDataWithoutCustom } from "../theme/ThemeContextWithoutCustom";
+import { Theme } from "../../types/Theme";
+import { DEFAULT_THEME } from "../../theme/themeConfigs";
+import { ThemeContextData } from "../../theme/WithoutCustomThemes/ThemeContext";
 
 /**
  * A hook for managing the application's theme that stores information in the localStorage.
  */
-function useThemeWithoutCustom(): ThemeContextDataWithoutCustom {
+function useTheme(): ThemeContextData {
 	const [currentTheme, setCurrentTheme] = useLocalStorage<Theme>(
 		"theme",
 		DEFAULT_THEME
@@ -33,4 +34,4 @@ function useThemeWithoutCustom(): ThemeContextDataWithoutCustom {
 	};
 }
 
-export default useThemeWithoutCustom;
+export default useTheme;
