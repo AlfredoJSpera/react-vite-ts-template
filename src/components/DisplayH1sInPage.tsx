@@ -19,6 +19,7 @@ function DisplayH1sInPage() {
 				if (error instanceof Error) {
 					setError(error.message);
 				} else {
+					console.error("An unknown error occurred:", error);
 					setError("An unknown error occurred");
 				}
 			}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { PREDEFINED_THEME_NAMES } from "../theme/theme";
-import useTheme from "../hooks/useTheme";
+import { useThemeContext } from "../hooks/useThemeContext";
 
 function ThemeSwitcher() {
 	const {
@@ -10,7 +10,7 @@ function ThemeSwitcher() {
 		saveCustomTheme,
 		editCustomTheme,
 		deleteCustomTheme,
-	} = useTheme();
+	} = useThemeContext();
 
 	// States for the new/edit theme form
 	const [newThemeName, setNewThemeName] = useState("");

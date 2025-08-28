@@ -1,21 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { Theme, DEFAULT_THEME } from "../theme/theme";
 import { useLocalStorage } from "@uidotdev/usehooks";
-
-interface UseThemeResult {
-	currentTheme: Theme;
-	applyNewCurrentTheme: (theme: Theme) => void;
-	customThemes: Theme[];
-	saveCustomTheme: (
-		name: string,
-		customVariables: Record<string, string>
-	) => void;
-	editCustomTheme: (
-		name: string,
-		customVariables: Record<string, string>
-	) => void;
-	deleteCustomTheme: (name: string) => void;
-}
+import { ThemeContextData } from "../theme/ThemeContext";
 
 /** Applies custom CSS variables to the document's HTML element and records keys applied. */
 function applyCustomVariables(
@@ -45,7 +31,7 @@ function removeAppliedCustomVariables(appliedKeys: Set<string>) {
  *
  * **Supports custom themes**.
  */
-function useTheme(): UseThemeResult {
+function useTheme(): ThemeContextData {
 	const [currentTheme, setCurrentTheme] = useLocalStorage<Theme>(
 		"theme",
 		DEFAULT_THEME
