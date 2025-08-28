@@ -18,6 +18,9 @@ function useThemeWithoutCustom(): UseThemeResult {
 
 	// Synchronize the theme state with the DOM when the theme changes
 	useEffect(() => {
+		// Prevent DOM manipulation during server-side rendering (SSR)
+		if (typeof document === "undefined") return;
+
 		document.documentElement.setAttribute("data-theme", currentTheme.name);
 	}, [currentTheme]);
 
