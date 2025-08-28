@@ -33,9 +33,14 @@ replace_files ./src/hooks useThemeContext.ts
 replace_files ./src/theme ThemeContext.ts
 replace_files ./src/theme ThemeProvider.tsx
 
-echo -e "Done!"
 
-echo -e "\033[33mRemember to edit the imports in these files (remove a '../' or '/WithoutCustomThemes'):\033[0m"
+echo -e "\033[33mUpdating import paths in replaced files (removing '../' and '/WithoutCustomThemes'):\033[0m"
 for file in "${replaced_files[@]}"; do
-	echo -e "\t\033[33m$file\033[0m"
+	# Regex for the imports:
+	# `../../*;` --> `../*;`
+	# `/WithoutCustomThemes/*;` --> `/*;`
+	sed -i -E "s|\.\./\.\./([^;]*);|../\1;|g; s|/WithoutCustomThemes/([^;]*);|/\1;|g" "$file"
+	echo -e "\t\033[33mUpdated imports in: $file\033[0m"
 done
+
+echo -e "Done! Remember to delete this script!"
