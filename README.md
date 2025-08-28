@@ -1,82 +1,92 @@
 # react-vite-ts-template
 
-This repository is a **template project** for quickly bootstrapping a **React** application using **TypeScript**, **Vite**, and **SWC**.
+A small template for a **React** + **Vite** + **TypeScript** app that can run as a normal web app or be packaged as a _browser extension_ (Firefox). It includes a _simple theme_ system (predefined + optional custom themes), an early theme loader to avoid [FOUC](https://en.wikipedia.org/wiki/Flash_of_unstyled_content), and content script integration.
 
-## Features
+## Highlights
 
--   **[Vite](https://vite.dev/) + [SWC](https://swc.rs/)** for fast builds and hot module replacement
--   **[React](https://react.dev/)** with **[TypeScript](https://www.typescriptlang.org/)** typings
--   Built-in **theme management** (persisted custom user-defined themes) and a fix for the [flash of unstyled content](https://en.wikipedia.org/wiki/Flash_of_unstyled_content) issue
--   Ready-to-package as a **Firefox extension (.xpi)**
+### Themes
 
-## Getting Started
+-   Theme system with predefined themes
+-   Custom themes defined at runtime (by the user, for example) saved in localStorage and applied as CSS variables
+    -   Theme hook
+    -   Theme Context helper
+    -   Theme Provider
+    -   [Example of a component using these](src/components/ThemeSwitcher.tsx)
+-   "Without custom themes" alternate implementation (lighter, only predefined themes)
+-   Early theme application before React mounts
 
-### 1. Clone the template
+### Firefox Extension
 
-```bash
-git clone https://github.com/AlfredoJSpera/react-vite-ts-template.git my-app
-cd my-app
-```
+-   Content script:
+    -   Message sender util for communication between content script and React app
+    -   [Example of a component using it](src/components/DisplayH1InPage.tsx)
+-   Vite config includes a content-script build entry
+-   Extension manifest
 
-> [!TIP]
-> Or click the "Use this template" button on the repository page on GitHub.
+## Quick start
 
-### 2. Install dependencies
+-   **Install dependencies**:
 
-```bash
-npm install
-```
+    ```shell
+    npm install
+    ```
 
-### 3. Start the development server
+-   **Run in dev**:
 
-```bash
-npm run dev
-```
+    ```shell
+    npm run dev
+    ```
 
-This will launch Vite in development mode with hot reloading.
+-   **Build**:
 
-## Build
+    ```shell
+    npm run build
+    ```
 
-### Standard build
+-   **Build XPI** (Firefox extension package):
+    ```shell
+    npm run build:xpi
+    ```
 
-```bash
-npm run build
-```
+## Theme provider usage
 
-Compiles the app into the `dist/` directory.
+Wrap your `App` component with [`ThemeProvider`](src/theme/ThemeProvider.tsx). From any component, use the context hook [`useThemeContext`](src/hooks/useThemeContext.ts) to access:
 
-### Build and package as .xpi
+-   currentTheme
+-   applyNewCurrentTheme
+-   custom theme functions (save/edit/delete) when using the full implementation
 
-A `.xpi` file is an archive used for packaging Firefox applications.
-
-```bash
-npm run build:xpi
-```
-
--   Runs the production build
--   Zips the contents of `dist/` into `extension.xpi`
-
-## Using the app as a Firefox extension
-
-### Extension manifest
-
-The manifest file `public/manifest.json` can be edited as needed to create the extension.
+The project includes a [`ThemeSwitcher`](src/components/ThemeSwitcher.tsx) component to switch theme.
 
 > [!NOTE]
-> For more information on manifest.json see [here](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json).
+> There are two implementations of the theme manager:
+>
+> -   **Full implementation**: both predefined and user-defined themes
+> -   **Only predefined themes**
 
-### Content script
+## Content script usage
 
-The `sendContentScriptMessage` function sends and receives messages to and from the `src/contentScript.ts` file. For an example of usage, see `src/components/DisplayH1InPage.tsx`.
+Register a message listener in [contentScript.ts](src/contentScript.ts) and send messages to it using [`sendContentScriptMessage`](src/utils/sendContentScriptMessage.ts).
+
+The project includes a content script that reads the first H1 on the page and it is used by the [`DisplayH1InPage`](src/components/DisplayH1InPage.tsx) component.
 
 > [!NOTE]
-> For more information on content scripts, see [here](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Content_scripts).
+> The content script can only run when the app is installed as an extension or when the content script is injected into a page. See [manifest.json](public/manifest.json).
 
-### Loading the app as a temporary extension
+## Initial configuration script
 
-#### Using the dist/ directory
+The [choose_project_configuration.sh](choose_project_configuration.sh) helper script automates one-time workspace configurations:
 
-1. Build the project like mentioned [above](#standard-build) to create the `/dist` directory
+-   Option 1: keep both predefined and user-defined themes (removes the `WithoutCustomThemes` directories)
+-   Option 2: use ONLY predefined themes (it replaces files from `WithoutCustomThemes` into the main locations)
+-   Option 3: remove Firefox extension files (removes content-script, helper utilities and manifest, and updates imports)
+
+> [!WARNING]
+> The script deletes/moves files from fixed locations. Execute this script before applying changes.
+
+## Load as a temporary Firefox extension
+
+1. Build the project to create the `/dist` directory
 2. Open Firefox and navigate to:
 
     ```
@@ -84,55 +94,8 @@ The `sendContentScriptMessage` function sends and receives messages to and from 
     ```
 
 3. Click **"Load Temporary Add-on"**
-4. Select any file in the `/dist` directory, for example `manifest.json`
-
-#### Using the .xpi file
-
-1. Obtain the `extension.xpi` like mentioned [above](#build-and-package-as-xpi)
-2. Open Firefox and navigate to:
-
-    ```
-    about:debugging#/runtime/this-firefox
-    ```
-
-3. Click **"Load Temporary Add-on"**
-4. Select `extension.xpi`
-
-### How to remove extension functionality
-
-Run the `remove_firefox_extension.sh` executable.
-
-## Themes
-
-### How to use the theme manager
-
-### How to add themes
-
-#### Predefined themes
-
--   Add the CSS variables that you intend to use for a theme in `src/theme/predefined-themes.css`
--   Add the name of the new theme in the **`PREDEFINED_THEME_NAMES`** array in `src/theme/themeConfig.ts`
-
-#### User-defined themes
-
-See `src/components/ThemeSwitcher.tsx` to see an example on how to use the `useThemeContext` hook.
-
-### How to use ONLY predefined themes
-
-Run the `set_without_custom_theme.sh` executable.
-
-### How the Flash of Unstyled Content fix works
-
-```mermaid
-flowchart TD
-    A[Visit Website] --> B[theme-loader.js runs in index.html before React]
-	B --> C{localStorage has theme?}
-	C -- No --> D[Fallback: predefined-themes.css :root theme]
-    C -- Yes --> E[Set data-theme attribute and eventual custom styles on the html tag]
-	D --> F[DOM is Styled before React is mounted]
-	E --> F
-```
+4. Select any file in the `/dist` directory, for example `manifest.json` or the `.xpi` file
 
 ## License
 
-This template is provided as-is under the [MIT license](LICENSE). Feel free to fork and customize it for your projects.
+This template is provided as-is under the [MIT license](LICENSE). Feel free to fork it and customize it for your projects.

@@ -18,20 +18,21 @@ if [ -f "./public/manifest.json" ]; then
 	has_manifest=true
 fi
 
-echo "Choose an operation:"
-echo
+echo "Theme configuration:"
 if $has_without_custom; then
-	echo "1) Use both predefined and user-defined themes"
-	echo "2) Use ONLY predefined themes"
+	echo "    1) Use both predefined and user-defined themes"
+	echo "    2) Use ONLY predefined themes"
 else
-	echo "1) Use both predefined and user-defined themes (disabled because 'WithoutCustomThemes' was not found)"
-	echo "2) Use ONLY predefined themes (disabled because 'WithoutCustomThemes' was not found)"
+	echo "    1) Use both predefined and user-defined themes (disabled because 'WithoutCustomThemes' was not found)"
+	echo "    2) Use ONLY predefined themes (disabled because 'WithoutCustomThemes' was not found)"
 fi
 
+echo 
+echo "Other configurations:"
 if $has_manifest; then
-	echo "3) Remove firefox extension files"
+	echo "    3) Remove firefox extension files"
 else
-	echo "3) Remove firefox extension files (disabled because 'public/manifest.json' was not found)"
+	echo "    3) Remove firefox extension files (disabled because 'public/manifest.json' was not found)"
 fi
 
 echo
