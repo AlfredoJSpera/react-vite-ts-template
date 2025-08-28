@@ -13,15 +13,6 @@
 					"data-theme",
 					parsed.name
 				);
-
-				// Apply any CSS variables in the theme if it is a custom one
-				if (parsed.customVariables) {
-					for (const [key, value] of Object.entries(
-						parsed.customVariables
-					)) {
-						document.documentElement.style.setProperty(key, value);
-					}
-				}
 			}
 		}
 	} catch (e) {
