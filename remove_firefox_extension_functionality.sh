@@ -22,11 +22,11 @@ if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
 fi
 
 #? MANUAL CHANGES: Delete the following files
-delete_file src/components/DisplayH1sInPage.tsx
-delete_file src/utils/sendContentScriptMessage.ts
-delete_file src/types/contentScriptTypes.ts
-delete_file src/contentScript.ts
-delete_file public/manifest.json
+delete_file ./src/components/DisplayH1sInPage.tsx
+delete_file ./src/utils/sendContentScriptMessage.ts
+delete_file ./src/types/contentScriptTypes.ts
+delete_file ./src/contentScript.ts
+delete_file ./public/manifest.json
 
 echo -e "\033[34m[Removing npm package] @types/firefox-webext-browser\033[0m"
 npm remove @types/firefox-webext-browser

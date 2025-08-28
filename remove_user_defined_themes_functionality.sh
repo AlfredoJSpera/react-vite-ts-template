@@ -34,7 +34,7 @@ if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
 	exit 1
 fi
 
-#? MANUAL CHANGES: Replace these files with their counterpart without custom themes in the /WithoutCustomThemes directories
+#? MANUAL CHANGES: Replace these files with their counterpart without custom themes in the "/WithoutCustomThemes" directories
 replace_files ./public theme-loader.js
 replace_files ./src/components ThemeSwitcher.tsx
 replace_files ./src/hooks useTheme.ts
