@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { sendContentScriptMessage } from "../utils/sendContentScriptMessage";
 
-function DisplayH1sInPage() {
+function DisplayH1InPage() {
 	const [headerText, setHeaderText] = useState<string | null>(null);
 	const [error, setError] = useState("");
 
@@ -52,4 +52,4 @@ function DisplayH1sInPage() {
 	);
 }
 
-export default DisplayH1sInPage;
+export default DisplayH1InPage;
