@@ -18,6 +18,11 @@ if [ -f "./public/manifest.json" ]; then
 	has_manifest=true
 fi
 
+has_content_script=false
+if [ -f "./src/contentScript.ts" ]; then
+	has_content_script=true
+fi
+
 echo "Theme configuration:"
 if $has_without_custom; then
 	echo "    1) Use both predefined and user-defined themes"
@@ -28,19 +33,34 @@ else
 fi
 
 echo 
-echo "Other configurations:"
+echo "Firefox extension configurations:"
 if $has_manifest; then
-	echo "    3) Remove firefox extension files"
+	echo "    3) Remove ALL firefox extension files"
 else
-	echo "    3) Remove firefox extension files (disabled because 'public/manifest.json' was not found)"
+	echo "    3) Remove ALL firefox extension files (disabled because 'public/manifest.json' was not found)"
+fi
+
+if $has_content_script; then
+	echo "    4) Remove content script files"
+else
+	echo "    4) Remove content script files (disabled because 'src/contentScript.ts' was not found)"
 fi
 
 echo
-read -p "Enter choice (1/2/3): " choice
+read -p "Enter choice (1/2/3/4): " choice
 
 display_warning() {
 	echo -e "\033[31mWARNING: This action is intended to be run only once, immediately after cloning the repository.\033[0m"
 	echo -e "\033[31mIf you have made changes to any of the listed files, do NOT run this. \033[0m"
+}
+
+delete_file() {
+	local file_to_delete=$1
+
+	if [ -f "${file_to_delete}" ]; then
+		echo -e "\033[32m[Deleting file] ${file_to_delete}\033[0m"
+		rm "${file_to_delete}"
+	fi
 }
 
 case "$choice" in
@@ -60,19 +80,17 @@ case "$choice" in
 			exit 1
 		fi
 
-		delete_directory() {
+		delete_without_custom_themes_directory() {
 			local directory_to_delete=$1
 			echo -e "\033[32m[Deleting directory] ${directory_to_delete}/WithoutCustomThemes\033[0m"
 			rm -rf "${directory_to_delete}/WithoutCustomThemes"
 		}
 
-		delete_directory ./public
-		delete_directory ./src/components
-		delete_directory ./src/hooks
-		delete_directory ./src/theme
-
-		echo -e "Done! Remember to delete this script!"
-		exit 0
+		delete_without_custom_themes_directory ./public
+		delete_without_custom_themes_directory ./src/components
+		delete_without_custom_themes_directory ./src/hooks
+		delete_without_custom_themes_directory ./src/theme
+		
 		;;
 
 	2)
@@ -120,8 +138,6 @@ case "$choice" in
 		replace_files ./src/theme ThemeContext.ts
 		replace_files ./src/theme ThemeProvider.tsx
 
-		echo -e "Done! Remember to delete this script!"
-		exit 0
 		;;
 
 	3)
@@ -140,12 +156,6 @@ case "$choice" in
 			exit 1
 		fi
 
-		delete_file() {
-			local file_to_delete=$1
-			echo -e "\033[32m[Deleting file] ${file_to_delete}\033[0m"
-			rm -f "${file_to_delete}"
-		}
-
 		delete_file ./src/components/DisplayH1InPage.tsx
 		delete_file ./src/utils/sendContentScriptMessage.ts
 		delete_file ./src/types/contentScriptTypes.ts
@@ -159,19 +169,53 @@ case "$choice" in
 		sed -i '/DisplayH1InPage/d' ./src/App.tsx
 
 
-		echo -e "\033[33m[Updating file] vite.config.ts\033[0m"
 		if [ -f vite.config.ts ]; then
+			echo -e "\033[33m[Updating file] ./vite.config.ts\033[0m"
 			sed -i '/\/\/! Browser Content Script Only/,/\/\/! ---------------------/d' vite.config.ts
-		else
-			echo "[ERROR] vite.config.ts not found."
 		fi
-
-		echo -e "Done! Remember to delete this script!"
-		exit 0
 		;;
 
+	4)
+		if ! $has_content_script; then
+			echo "Option 4 is disabled because 'src/contentScript.ts' was not found. Exiting."
+			exit 1
+		fi
+
+		echo -e "==========================================="
+		echo -e "Removing content script functionality..."
+		display_warning
+
+		read -p "Are you sure you want to remove firefox extension content script functionality? (y/N): " confirm
+		if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+			echo "Operation aborted."
+			exit 1
+		fi
+
+		delete_file ./src/components/DisplayH1InPage.tsx
+		delete_file ./src/utils/sendContentScriptMessage.ts
+		delete_file ./src/types/ContentScript.ts
+		delete_file ./src/contentScript.ts
+
+		echo -e "\033[33m[Updating file] ./src/App.tsx\033[0m"
+		sed -i '/DisplayH1InPage/d' ./src/App.tsx
+
+		if [ -f ./public/manifest.json ]; then
+			echo -e "\033[33m[Updating file] ./public/manifest.json\033[0m"
+			echo -e "\033[31m[Updating file] ./public/manifest.json, WARNING: I will have to delete specific line numbers. Check if the JSON is not malformed after this.\033[0m"
+			sed -i '25,30d' ./public/manifest.json
+			sed -i 's/"permissions": \[\],/"permissions": \[\]/' ./public/manifest.json
+		fi
+
+		if [ -f vite.config.ts ]; then
+			echo -e "\033[33m[Updating file] ./vite.config.ts\033[0m"
+			sed -i '/\/\/! Browser Content Script Only/,/\/\/! ---------------------/d' vite.config.ts
+		fi
+		;;
 	*)
 		echo "Invalid choice. Exiting."
 		exit 1
 		;;
 esac
+
+echo -e "Done! Remember to delete this script!"
+exit 0
