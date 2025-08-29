@@ -28,9 +28,15 @@ git clone https://github.com/AlfredoJSpera/react-vite-ts-template.git my-app
 cd my-app
 ```
 
+> [!TIP]
+> Or click the "Use this template" button on the repository page on GitHub.
+
 ### Initial configuration script
 
 Run the [choose_project_configuration.sh](choose_project_configuration.sh) helper script; it automates **one-time** workspace configurations.
+
+> [!WARNING]
+> The script deletes/moves files from fixed locations. Execute this script before applying changes.
 
 #### Theme configuration
 
@@ -43,9 +49,6 @@ Run the [choose_project_configuration.sh](choose_project_configuration.sh) helpe
 #### Other configurations
 
 -   Removes Firefox extension files (removes content-script, helper utilities and manifest, and updates imports)
-
-> [!WARNING]
-> The script deletes/moves files from fixed locations. Execute this script before applying changes.
 
 ### Commands
 

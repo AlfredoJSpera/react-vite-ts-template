@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { PREDEFINED_THEME_NAMES } from "../theme/themeConfigs";
 import { useThemeContext } from "../hooks/useThemeContext";
+import { FaPencilAlt, FaTrashAlt } from "react-icons/fa";
 
 function ThemeSwitcher() {
 	const {
@@ -66,7 +67,7 @@ function ThemeSwitcher() {
 
 			<div>
 				<h3>Default themes</h3>
-				<div className="button-group">
+				<div className="predefined-container">
 					{PREDEFINED_THEME_NAMES.map((themeName) => {
 						return (
 							<button
@@ -84,7 +85,7 @@ function ThemeSwitcher() {
 
 			<div>
 				<h3>Custom themes</h3>
-				<div className="button-group">
+				<div className="custom-container">
 					{customThemes.map((theme) => {
 						return (
 							<div key={theme.name} className="custom-theme-item">
@@ -93,20 +94,32 @@ function ThemeSwitcher() {
 								>
 									{theme.name}
 								</button>
-								<button
-									onClick={() => handleEditTheme(theme.name)}
-									title={"Edit " + theme.name}
-								>
-									E
-								</button>
-								<button
-									onClick={() =>
-										handleDeleteTheme(theme.name)
-									}
-									title={"Delete " + theme.name}
-								>
-									D
-								</button>
+								<div className="custom-theme-item-settings">
+									<button
+										style={{
+											marginRight: "0.5rem",
+											borderRadius: "50px",
+										}}
+										onClick={() =>
+											handleEditTheme(theme.name)
+										}
+										title={"Edit " + theme.name}
+									>
+										<FaPencilAlt />
+									</button>
+									<button
+										style={{
+											marginRight: "0.5rem",
+											borderRadius: "50px",
+										}}
+										onClick={() =>
+											handleDeleteTheme(theme.name)
+										}
+										title={"Delete " + theme.name}
+									>
+										<FaTrashAlt />
+									</button>
+								</div>
 							</div>
 						);
 					})}
