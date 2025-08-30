@@ -19,6 +19,10 @@ A small template for a **React** + **Vite** + **TypeScript** app that can run as
 -   Message sender function for communication between content script and React app ([example of a component using it](src/components/DisplayH1InPage.tsx))
 -   Vite config includes a content-script build entry
 
+### Multi-page application
+
+-   Simple multi-page application router using `react-router-dom`
+
 ## Quick start
 
 ### Clone the repository
@@ -33,7 +37,13 @@ cd my-app
 
 ### Initial configuration script
 
-Run the [choose_project_configuration.sh](choose_project_configuration.sh) helper script; it automates **one-time** workspace configurations.
+Run the [choose_project_configuration.ts](choose_project_configuration.ts) script; it automates the **one-time** workspace configurations.
+
+```bash
+npm run choose-config
+```
+
+Once you're done, delete both the script file from the repository and the npm script from `package.json`.
 
 > [!WARNING]
 > The script deletes/moves files from fixed locations. Execute this script before applying changes.
@@ -46,9 +56,10 @@ Run the [choose_project_configuration.sh](choose_project_configuration.sh) helpe
 > -   **Full implementation**: both predefined and user-defined themes
 > -   **Only predefined themes**
 
-#### Other configurations
+#### Extension configuration
 
--   Removes Firefox extension files (removes content-script, helper utilities and manifest, and updates imports)
+-   Remove all Firefox extension files (removes content-script, helper utilities and manifest, and updates imports)
+-   Remove only content script files
 
 ### Commands
 
@@ -99,12 +110,29 @@ The project includes a content script that reads the first H1 on the page and it
 1. Build the project to create the `/dist` directory
 2. Open Firefox and navigate to:
 
-    ```
+    ```url
     about:debugging#/runtime/this-firefox
     ```
 
 3. Click **"Load Temporary Add-on"**
 4. Select any file in the `/dist` directory, for example `manifest.json` or the `.xpi` file
+
+## How does the Router work
+
+This template ships with client-side routing ready: routes are defined in `src/main.tsx` (the template uses `HashRouter` by default for extension builds and provides routes for `/` and `/about`).
+
+To add a new page, create a component under `src/pages` (for example `Contact.tsx`) and register a route `src/main.tsx` like this:
+
+```tsx
+<Route path="/contact" element={<Contact />} />
+```
+
+> [!TIP]
+>
+> -   Use `HashRouter` when building the app as a browser extension
+> -   Switch to `BrowserRouter` for a normal website
+
+This keeps the template flexible for both single-page web apps and multi-page-like navigation inside an extension.
 
 ## License
 

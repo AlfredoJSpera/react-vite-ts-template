@@ -79,7 +79,6 @@ function deleteDirectory(dirPath: string) {
 	}
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function removeNpmPackage(pkg: string) {
 	console.log(`${CYAN}[Removing npm package] ${pkg}${RESET}`);
 	const res = spawnSync("npm", ["remove", pkg], { stdio: "inherit" });
@@ -88,12 +87,8 @@ function removeNpmPackage(pkg: string) {
 	}
 }
 
-function updateFileLog(fileToUpdate: string, isImportUpdate = false) {
-	if (isImportUpdate) {
-		console.log(`${GREEN}[Updating imports] ${fileToUpdate}${RESET}`);
-	} else {
-		console.log(`${GREEN}[Updating file] ${fileToUpdate}${RESET}`);
-	}
+function updateFileLog(fileToUpdate: string) {
+	console.log(`${GREEN}[Updating file] ${fileToUpdate}${RESET}`);
 }
 
 function moveFile(oldPath: string, newPath: string) {
@@ -271,7 +266,7 @@ async function main() {
 
 				// Update imports in replaced files
 				if (fileExists(originalFilePath)) {
-					updateFileLog(originalFilePath, true);
+					updateFileLog(originalFilePath);
 
 					let content = fs.readFileSync(originalFilePath, "utf8");
 
@@ -312,243 +307,138 @@ async function main() {
 
 		// TODO: REMAKE CASE 3 AND 4 ONCE ROOT/APP ROUTES ARE DONE
 
-		// case "3": {
-		// 	checkIfDisabledChoiceIsSelected(
-		// 		3,
-		// 		hasManifest,
-		// 		choiceThreeDisabledNotice
-		// 	);
+		case "3": {
+			checkIfDisabledChoiceIsSelected(
+				3,
+				hasManifest,
+				choiceThreeDisabledNotice
+			);
 
-		// 	displayWarning("Remove firefox extension functionality");
+			displayWarning("Removing firefox extension functionality...");
 
-		// 	await askForConfirmation("remove firefox extension functionality");
+			await askForConfirmation("remove firefox extension functionality");
 
-		// 	deleteFile("./src/components/DisplayH1InPage.tsx");
-		// 	deleteFile("./src/utils/sendContentScriptMessage.ts");
-		// 	deleteFile("./src/types/contentScriptTypes.ts");
-		// 	deleteFile("./src/contentScript.ts");
-		// 	deleteFile("./public/manifest.json");
+			deleteFile("./src/components/DisplayH1InPage.tsx");
+			deleteFile("./src/utils/sendContentScriptMessage.ts");
+			deleteFile("./src/types/contentScriptTypes.ts");
+			deleteFile("./src/contentScript.ts");
+			deleteFile("./public/manifest.json");
 
-		// 	removeNpmPackage("@types/firefox-webext-browser");
+			removeNpmPackage("@types/firefox-webext-browser");
 
-		// 	// Update ./src/App.tsx: remove lines containing DisplayH1InPage
-		// 	// if (fileExists("./src/App.tsx")) {
-		// 	// 	const appPath = "./src/App.tsx";
-		// 	// 	updateFileLog(appPath, false);
-		// 	// 	const content = fs
-		// 	// 		.readFileSync(appPath, "utf8")
-		// 	// 		.split("\n")
-		// 	// 		.filter((l) => !l.includes("DisplayH1InPage"))
-		// 	// 		.join("\n");
+			const appPath = "./src/App.tsx";
+			if (fileExists(appPath)) {
+				updateFileLog(appPath);
 
-		// 	// 	fs.writeFileSync(appPath, content, "utf8");
-		// 	// }
+				// Remove lines containing DisplayH1InPage
+				const content = fs
+					.readFileSync(appPath, "utf8")
+					.split("\n")
+					.filter((l) => !l.includes("DisplayH1InPage"))
+					.join("\n");
 
-		// 	// Update vite.config.ts: remove block between special comments
-		// 	if (fileExists("vite.config.ts")) {
-		// 		const viteConfigPath = "./vite.config.ts";
-		// 		updateFileLog(viteConfigPath);
+				fs.writeFileSync(appPath, content, "utf8");
+			}
 
-		// 		let content = fs.readFileSync(viteConfigPath, "utf8");
-		// 		content = content.replace(
-		// 			/\/\/! Browser Content Script Only[\s\S]*?\/\/! ---------------------/g,
-		// 			""
-		// 		);
-		// 		fs.writeFileSync(viteConfigPath, content, "utf8");
-		// 	}
+			const viteConfigPath = "./vite.config.ts";
+			if (fileExists(viteConfigPath)) {
+				updateFileLog(viteConfigPath);
 
-		// 	break;
-		// }
+				// Remove block between special comments
+				let content = fs.readFileSync(viteConfigPath, "utf8");
+				content = content.replace(
+					/\/\/! Browser Content Script Only[\s\S]*?\/\/! ---------------------/g,
+					""
+				);
+				fs.writeFileSync(viteConfigPath, content, "utf8");
+			}
 
-		// case "4": {
-		// 	if (!hasContentScript) {
-		// 		console.error(
-		// 			"Option 4 is disabled because 'src/contentScript.ts' was not found. Exiting."
-		// 		);
-		// 		process.exit(1);
-		// 	}
+			const mainPath = "./src/main.tsx";
+			if (fileExists(mainPath)) {
+				updateFileLog(mainPath);
 
-		// 	console.log("===========================================");
-		// 	console.log("Removing content script functionality...");
-		// 	displayWarning(
-		// 		"Remove firefox extension content script functionality"
-		// 	);
+				// Change from HashRouter to BrowserRouter
+				let content = fs.readFileSync(mainPath, "utf8");
+				content = content
+					.replace("HashRouter", "BrowserRouter")
+					.replace("<HashRouter>", "<BrowserRouter>")
+					.replace("</HashRouter>", "</BrowserRouter>");
+				fs.writeFileSync(mainPath, content, "utf8");
+			}
 
-		// 	await askForConfirmation(
-		// 		"remove firefox extension content script functionality"
-		// 	);
+			break;
+		}
 
-		// 	deleteFile("./src/components/DisplayH1InPage.tsx");
-		// 	deleteFile("./src/utils/sendContentScriptMessage.ts");
-		// 	deleteFile("./src/types/ContentScript.ts");
-		// 	deleteFile("./src/contentScript.ts");
+		case "4": {
+			checkIfDisabledChoiceIsSelected(
+				4,
+				hasContentScript,
+				choiceFourDisabledNotice
+			);
 
-		// 	// Update ./src/App.tsx: remove lines containing DisplayH1InPage
-		// 	if (fileExists("./src/App.tsx")) {
-		// 		const appPath = "./src/App.tsx";
-		// 		updateFileLog(appPath, false);
-		// 		const content = fs
-		// 			.readFileSync(appPath, "utf8")
-		// 			.split("\n")
-		// 			.filter((l) => !l.includes("DisplayH1InPage"))
-		// 			.join("\n");
-		// 		fs.writeFileSync(appPath, content, "utf8");
-		// 	}
+			displayWarning(
+				"Removing firefox extension content script functionality..."
+			);
 
-		// 	// Update manifest.json safely: remove content_scripts and keep permissions as-is
-		// 	if (fileExists("./public/manifest.json")) {case "3": {
-		// 	checkIfDisabledChoiceIsSelected(
-		// 		3,
-		// 		hasManifest,
-		// 		choiceThreeDisabledNotice
-		// 	);
+			await askForConfirmation(
+				"remove firefox extension content script functionality"
+			);
 
-		// 	displayWarning("Remove firefox extension functionality");
+			deleteFile("./src/components/DisplayH1InPage.tsx");
+			deleteFile("./src/utils/sendContentScriptMessage.ts");
+			deleteFile("./src/types/ContentScript.ts");
+			deleteFile("./src/contentScript.ts");
 
-		// 	await askForConfirmation("remove firefox extension functionality");
+			const appPath = "./src/App.tsx";
+			if (fileExists(appPath)) {
+				updateFileLog(appPath);
 
-		// 	deleteFile("./src/components/DisplayH1InPage.tsx");
-		// 	deleteFile("./src/utils/sendContentScriptMessage.ts");
-		// 	deleteFile("./src/types/contentScriptTypes.ts");
-		// 	deleteFile("./src/contentScript.ts");
-		// 	deleteFile("./public/manifest.json");
+				// Remove lines containing DisplayH1InPage
+				const content = fs
+					.readFileSync(appPath, "utf8")
+					.split("\n")
+					.filter((l) => !l.includes("DisplayH1InPage"))
+					.join("\n");
 
-		// 	removeNpmPackage("@types/firefox-webext-browser");
+				fs.writeFileSync(appPath, content, "utf8");
+			}
 
-		// 	// Update ./src/App.tsx: remove lines containing DisplayH1InPage
-		// 	// if (fileExists("./src/App.tsx")) {
-		// 	// 	const appPath = "./src/App.tsx";
-		// 	// 	updateFileLog(appPath, false);
-		// 	// 	const content = fs
-		// 	// 		.readFileSync(appPath, "utf8")
-		// 	// 		.split("\n")
-		// 	// 		.filter((l) => !l.includes("DisplayH1InPage"))
-		// 	// 		.join("\n");
+			const manifestPath = "./public/manifest.json";
+			if (fileExists(manifestPath)) {
+				updateFileLog(manifestPath);
+				try {
+					// Update manifest.json safely: remove content_scripts
+					const raw = fs.readFileSync(manifestPath, "utf8");
+					const obj = JSON.parse(raw);
+					if ("content_scripts" in obj) delete obj["content_scripts"];
 
-		// 	// 	fs.writeFileSync(appPath, content, "utf8");
-		// 	// }
+					fs.writeFileSync(
+						manifestPath,
+						JSON.stringify(obj, null, "\t"),
+						"utf8"
+					);
+				} catch (err) {
+					console.error(
+						`${RED}Failed to parse or update manifest.json: ${err}${RESET}`
+					);
+				}
+			}
 
-		// 	// Update vite.config.ts: remove block between special comments
-		// 	if (fileExists("vite.config.ts")) {
-		// 		const viteConfigPath = "./vite.config.ts";
-		// 		updateFileLog(viteConfigPath);
+			const viteConfigPath = "./vite.config.ts";
+			if (fileExists(viteConfigPath)) {
+				updateFileLog(viteConfigPath);
 
-		// 		let content = fs.readFileSync(viteConfigPath, "utf8");
-		// 		content = content.replace(
-		// 			/\/\/! Browser Content Script Only[\s\S]*?\/\/! ---------------------/g,
-		// 			""
-		// 		);
-		// 		fs.writeFileSync(viteConfigPath, content, "utf8");
-		// 	}
+				// Remove block between special comments
+				let content = fs.readFileSync(viteConfigPath, "utf8");
+				content = content.replace(
+					/\/\/! Browser Content Script Only[\s\S]*?\/\/! ---------------------/g,
+					""
+				);
+				fs.writeFileSync(viteConfigPath, content, "utf8");
+			}
 
-		// 	break;
-		// }
-
-		// case "4": {
-		// 	if (!hasContentScript) {
-		// 		console.error(
-		// 			"Option 4 is disabled because 'src/contentScript.ts' was not found. Exiting."
-		// 		);
-		// 		process.exit(1);
-		// 	}
-
-		// 	console.log("===========================================");
-		// 	console.log("Removing content script functionality...");
-		// 	displayWarning(
-		// 		"Remove firefox extension content script functionality"
-		// 	);
-
-		// 	await askForConfirmation(
-		// 		"remove firefox extension content script functionality"
-		// 	);
-
-		// 	deleteFile("./src/components/DisplayH1InPage.tsx");
-		// 	deleteFile("./src/utils/sendContentScriptMessage.ts");
-		// 	deleteFile("./src/types/ContentScript.ts");
-		// 	deleteFile("./src/contentScript.ts");
-
-		// 	// Update ./src/App.tsx: remove lines containing DisplayH1InPage
-		// 	if (fileExists("./src/App.tsx")) {
-		// 		const appPath = "./src/App.tsx";
-		// 		updateFileLog(appPath, false);
-		// 		const content = fs
-		// 			.readFileSync(appPath, "utf8")
-		// 			.split("\n")
-		// 			.filter((l) => !l.includes("DisplayH1InPage"))
-		// 			.join("\n");
-		// 		fs.writeFileSync(appPath, content, "utf8");
-		// 	}
-
-		// 	// Update manifest.json safely: remove content_scripts and keep permissions as-is
-		// 	if (fileExists("./public/manifest.json")) {
-		// 		const manifestPath = "./public/manifest.json";
-		// 		updateFileLog(manifestPath, false);
-		// 		try {
-		// 			const raw = fs.readFileSync(manifestPath, "utf8");
-		// 			const obj = JSON.parse(raw);
-		// 			if ("content_scripts" in obj) delete obj["content_scripts"];
-		// 			// ensure permissions is an array (leave unchanged otherwise)
-		// 			if (!Array.isArray(obj.permissions)) obj.permissions = [];
-		// 			fs.writeFileSync(
-		// 				manifestPath,
-		// 				JSON.stringify(obj, null, 2),
-		// 				"utf8"
-		// 			);
-		// 			console.log(`${YELLOW}[Updated] ${manifestPath}${RESET}`);
-		// 		} catch (err) {
-		// 			console.error(
-		// 				`${RED}Failed to parse or update manifest.json: ${err}${RESET}`
-		// 			);
-		// 		}
-		// 	}
-
-		// 	if (fileExists("vite.config.ts")) {
-		// 		const vc = "vite.config.ts";
-		// 		updateFileLog(vc, false);
-		// 		let content = fs.readFileSync(vc, "utf8");
-		// 		content = content.replace(
-		// 			/\/\/! Browser Content Script Only[\s\S]*?\/\/! ---------------------/g,
-		// 			""
-		// 		);
-		// 		fs.writeFileSync(vc, content, "utf8");
-		// 	}
-
-		// 	break;
-		// }
-		// 		const manifestPath = "./public/manifest.json";
-		// 		updateFileLog(manifestPath, false);
-		// 		try {
-		// 			const raw = fs.readFileSync(manifestPath, "utf8");
-		// 			const obj = JSON.parse(raw);
-		// 			if ("content_scripts" in obj) delete obj["content_scripts"];
-		// 			// ensure permissions is an array (leave unchanged otherwise)
-		// 			if (!Array.isArray(obj.permissions)) obj.permissions = [];
-		// 			fs.writeFileSync(
-		// 				manifestPath,
-		// 				JSON.stringify(obj, null, 2),
-		// 				"utf8"
-		// 			);
-		// 			console.log(`${YELLOW}[Updated] ${manifestPath}${RESET}`);
-		// 		} catch (err) {
-		// 			console.error(
-		// 				`${RED}Failed to parse or update manifest.json: ${err}${RESET}`
-		// 			);
-		// 		}
-		// 	}
-
-		// 	if (fileExists("vite.config.ts")) {
-		// 		const vc = "vite.config.ts";
-		// 		updateFileLog(vc, false);
-		// 		let content = fs.readFileSync(vc, "utf8");
-		// 		content = content.replace(
-		// 			/\/\/! Browser Content Script Only[\s\S]*?\/\/! ---------------------/g,
-		// 			""
-		// 		);
-		// 		fs.writeFileSync(vc, content, "utf8");
-		// 	}
-
-		// 	break;
-		// }
+			break;
+		}
 
 		default:
 			console.error("Invalid choice. Exiting.");
