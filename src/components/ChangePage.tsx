@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-function Header() {
+function ChangePage() {
 	return (
 		<div>
 			<Link to="/">Home</Link> <Link to="/about">About</Link>
@@ -8,4 +8,4 @@ function Header() {
 	);
 }
 
-export default Header;
+export default ChangePage;

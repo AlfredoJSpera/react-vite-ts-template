@@ -1,13 +1,17 @@
 import "./css/App.css";
-import { Route, Routes } from "react-router-dom";
-import Homepage from "./pages/Homepage";
-import About from "./pages/About";
+import ThemeButton from "./components/ThemeButton";
+import DisplayH1InPage from "./components/DisplayH1InPage";
+import ChangePage from "./components/ChangePage";
 
-export default function App() {
+function App() {
 	return (
-		<Routes>
-			<Route path="/" element={<Homepage />} />
-			<Route path="/about" element={<About />} />
-		</Routes>
+		<div className="app-container">
+			<h1>React + Vite + TypeScript</h1>
+			<ChangePage />
+			<DisplayH1InPage />
+			<ThemeButton />
+		</div>
 	);
 }
+
+export default App;
