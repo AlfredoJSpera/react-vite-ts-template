@@ -1,0 +1,565 @@
+#!/usr/bin/env node
+import fs from "fs";
+import path from "path";
+import { spawnSync } from "child_process";
+import readline from "readline/promises";
+import { stdin, stdout } from "process";
+
+//MARK: Colors
+
+const RED = "\u001b[31m";
+const YELLOW = "\u001b[33m";
+const MAGENTA = "\u001b[35m";
+const CYAN = "\u001b[36m";
+const GREEN = "\u001b[32m";
+const RESET = "\u001b[0m";
+
+//MARK: Helpers
+
+function fileExists(filePath: string) {
+	return fs.existsSync(filePath) && fs.lstatSync(filePath).isFile();
+}
+
+function directoryExists(directoryPath: string) {
+	return (
+		fs.existsSync(directoryPath) &&
+		fs.lstatSync(directoryPath).isDirectory()
+	);
+}
+
+function getDirectoryFileNumber(directoryPath: string) {
+	if (directoryExists(directoryPath)) {
+		return fs.readdirSync(directoryPath).length;
+	} else {
+		return -1;
+	}
+}
+
+function directoryExistsInRoots(roots: string[], targetName: string): boolean {
+	for (const root of roots) {
+		if (!fs.existsSync(root)) continue;
+		const found = searchDirectoryRecursive(root, targetName);
+		if (found) return true;
+	}
+	return false;
+}
+
+function searchDirectoryRecursive(
+	directoryPath: string,
+	targetName: string
+): boolean {
+	try {
+		const entries = fs.readdirSync(directoryPath, { withFileTypes: true });
+		for (const e of entries) {
+			if (e.isDirectory() && e.name === targetName) return true;
+			if (e.isDirectory()) {
+				const sub = path.join(directoryPath, e.name);
+				if (searchDirectoryRecursive(sub, targetName)) return true;
+			}
+		}
+	} catch {
+		// ignore
+	}
+	return false;
+}
+
+//MARK: Operation functions
+
+function deleteFile(filePath: string, noLogging: boolean = false) {
+	if (fileExists(filePath)) {
+		if (noLogging)
+			console.log(`${YELLOW}[Deleting file] ${filePath}${RESET}`);
+		fs.unlinkSync(filePath);
+	}
+}
+
+function deleteDirectory(dirPath: string) {
+	if (directoryExists(dirPath)) {
+		console.log(`${MAGENTA}[Deleting directory] ${dirPath}${RESET}`);
+		fs.rmSync(dirPath, { recursive: true, force: true });
+	}
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function removeNpmPackage(pkg: string) {
+	console.log(`${CYAN}[Removing npm package] ${pkg}${RESET}`);
+	const res = spawnSync("npm", ["remove", pkg], { stdio: "inherit" });
+	if (res.error) {
+		console.error(`${RED}npm remove failed: ${res.error}${RESET}`);
+	}
+}
+
+function updateFileLog(fileToUpdate: string, isImportUpdate = false) {
+	if (isImportUpdate) {
+		console.log(`${GREEN}[Updating imports] ${fileToUpdate}${RESET}`);
+	} else {
+		console.log(`${GREEN}[Updating file] ${fileToUpdate}${RESET}`);
+	}
+}
+
+function moveFile(oldPath: string, newPath: string) {
+	if (fileExists(newPath)) {
+		// Makes sure the destination directory exists
+		fs.mkdirSync(path.dirname(oldPath), {
+			recursive: true,
+		});
+
+		// Move the file
+		fs.renameSync(oldPath, newPath);
+	}
+}
+
+//MARK: Choices helpers
+
+async function prompt(question: string) {
+	const rl = readline.createInterface({ input: stdin, output: stdout });
+	const answer = await rl.question(question);
+	rl.close();
+	return answer;
+}
+
+function checkIfDisabledChoiceIsSelected(
+	choiceNumber: number,
+	isNotDisabled: boolean,
+	disabledNotice: string
+) {
+	if (!isNotDisabled) {
+		console.error(
+			`${RED}Option ${choiceNumber} is disabled because ${disabledNotice}.${RESET} Exiting...`
+		);
+		process.exit(1);
+	}
+}
+
+function displayWarning(operationDescription: string) {
+	console.log("===========================================");
+	console.log(operationDescription);
+	console.log(
+		`${RED}WARNING: This action is intended to be run only once, immediately after cloning the repository.${RESET}`
+	);
+	console.log(
+		`${RED}If you have made changes to any of the listed files, do NOT run this.${RESET}`
+	);
+}
+
+async function askForConfirmation(operationDescription: string) {
+	const confirm = await prompt(
+		`Are you sure you want to ${operationDescription}? (y/N): `
+	);
+
+	if (confirm !== "y" && confirm !== "Y") {
+		console.log("Operation aborted.");
+		process.exit(0);
+	}
+}
+
+function displayChoices(
+	choiceNumber: number,
+	promptText: string,
+	isNotDisabled: boolean,
+	disabledNotice: string
+) {
+	if (isNotDisabled) {
+		console.log(`    ${choiceNumber}) ${promptText}`);
+	} else {
+		console.log(
+			`    ${choiceNumber}) ${promptText} (disabled because ${disabledNotice})`
+		);
+	}
+}
+
+//MARK: Detect project layout
+
+const hasWithoutCustom = directoryExistsInRoots(
+	["./public", "./src"],
+	"WithoutCustomThemes"
+);
+const hasManifest = fileExists("./public/manifest.json");
+const hasContentScript = fileExists("./src/contentScript.ts");
+
+//MARK: Display choices
+
+console.log("Theme configuration:");
+const choiceOneAndTwoDisabledNotice = "'WithoutCustomThemes' was not found";
+displayChoices(
+	1,
+	"Use both predefined and user-defined themes",
+	hasWithoutCustom,
+	choiceOneAndTwoDisabledNotice
+);
+displayChoices(
+	2,
+	"Use ONLY predefined themes",
+	hasWithoutCustom,
+	choiceOneAndTwoDisabledNotice
+);
+console.log();
+
+console.log("Firefox extension configurations:");
+const choiceThreeDisabledNotice = "'public/manifest.json' was not found";
+displayChoices(
+	3,
+	"Remove ALL firefox extension files",
+	hasManifest,
+	choiceThreeDisabledNotice
+);
+const choiceFourDisabledNotice = "'src/contentScript.ts' was not found";
+displayChoices(
+	4,
+	"Remove content script files",
+	hasContentScript,
+	choiceFourDisabledNotice
+);
+console.log();
+
+//MARK: Main
+
+async function main() {
+	const choiceRaw = await prompt("Enter choice (1/2/3/4): ");
+	const choice = choiceRaw.trim();
+	switch (choice) {
+		case "1": {
+			checkIfDisabledChoiceIsSelected(
+				1,
+				hasWithoutCustom,
+				choiceOneAndTwoDisabledNotice
+			);
+
+			displayWarning(
+				"Removing functionality to use only predefined themes..."
+			);
+
+			await askForConfirmation(
+				"remove the functionality to use only predefined themes"
+			);
+
+			deleteDirectory("./public/WithoutCustomThemes");
+			deleteDirectory("./src/components/WithoutCustomThemes");
+			deleteDirectory("./src/hooks/WithoutCustomThemes");
+			deleteDirectory("./src/theme/WithoutCustomThemes");
+
+			break;
+		}
+
+		case "2": {
+			checkIfDisabledChoiceIsSelected(
+				2,
+				hasWithoutCustom,
+				choiceOneAndTwoDisabledNotice
+			);
+
+			displayWarning(
+				"Replacing files with predefined-themes-only counterparts"
+			);
+
+			await askForConfirmation(
+				"replace files with their predefined-themes-only counterparts"
+			);
+
+			const replaceFiles = (fileDirectory: string, fileName: string) => {
+				const originalFilePath = path.join(fileDirectory, fileName);
+				const themeLessFilePath = path.join(
+					fileDirectory,
+					"WithoutCustomThemes",
+					fileName
+				);
+
+				// Replace the original file with the theme-less file
+				deleteFile(originalFilePath, true);
+				moveFile(themeLessFilePath, originalFilePath);
+
+				// Update imports in replaced files
+				if (fileExists(themeLessFilePath)) {
+					updateFileLog(originalFilePath, true);
+
+					let content = fs.readFileSync(originalFilePath, "utf8");
+
+					// Remove one `../` from `../../`
+					content = content.replace(
+						/\.\.\/\.\.\/([^;]*);/g,
+						"../$1;"
+					);
+
+					// Remove `/WithoutCustomThemes`
+					content = content.replace(
+						/\/WithoutCustomThemes\/([^;]*);/g,
+						"/$1;"
+					);
+
+					fs.writeFileSync(originalFilePath, content, "utf8");
+				}
+
+				// Delete the theme-less directory if empty
+				const withoutDir = path.join(
+					fileDirectory,
+					"WithoutCustomThemes"
+				);
+				if (getDirectoryFileNumber(withoutDir) === 0) {
+					deleteDirectory(withoutDir);
+				}
+			};
+
+			replaceFiles("./public", "theme-loader.js");
+			replaceFiles("./src/components", "ThemeSwitcher.tsx");
+			replaceFiles("./src/hooks", "useTheme.ts");
+			replaceFiles("./src/hooks", "useThemeContext.ts");
+			replaceFiles("./src/theme", "ThemeContext.ts");
+			replaceFiles("./src/theme", "ThemeProvider.tsx");
+
+			break;
+		}
+
+		// TODO: REMAKE CASE 3 AND 4 ONCE ROOT/APP ROUTES ARE DONE
+
+		// case "3": {
+		// 	checkIfDisabledChoiceIsSelected(
+		// 		3,
+		// 		hasManifest,
+		// 		choiceThreeDisabledNotice
+		// 	);
+
+		// 	displayWarning("Remove firefox extension functionality");
+
+		// 	await askForConfirmation("remove firefox extension functionality");
+
+		// 	deleteFile("./src/components/DisplayH1InPage.tsx");
+		// 	deleteFile("./src/utils/sendContentScriptMessage.ts");
+		// 	deleteFile("./src/types/contentScriptTypes.ts");
+		// 	deleteFile("./src/contentScript.ts");
+		// 	deleteFile("./public/manifest.json");
+
+		// 	removeNpmPackage("@types/firefox-webext-browser");
+
+		// 	// Update ./src/App.tsx: remove lines containing DisplayH1InPage
+		// 	// if (fileExists("./src/App.tsx")) {
+		// 	// 	const appPath = "./src/App.tsx";
+		// 	// 	updateFileLog(appPath, false);
+		// 	// 	const content = fs
+		// 	// 		.readFileSync(appPath, "utf8")
+		// 	// 		.split("\n")
+		// 	// 		.filter((l) => !l.includes("DisplayH1InPage"))
+		// 	// 		.join("\n");
+
+		// 	// 	fs.writeFileSync(appPath, content, "utf8");
+		// 	// }
+
+		// 	// Update vite.config.ts: remove block between special comments
+		// 	if (fileExists("vite.config.ts")) {
+		// 		const viteConfigPath = "./vite.config.ts";
+		// 		updateFileLog(viteConfigPath);
+
+		// 		let content = fs.readFileSync(viteConfigPath, "utf8");
+		// 		content = content.replace(
+		// 			/\/\/! Browser Content Script Only[\s\S]*?\/\/! ---------------------/g,
+		// 			""
+		// 		);
+		// 		fs.writeFileSync(viteConfigPath, content, "utf8");
+		// 	}
+
+		// 	break;
+		// }
+
+		// case "4": {
+		// 	if (!hasContentScript) {
+		// 		console.error(
+		// 			"Option 4 is disabled because 'src/contentScript.ts' was not found. Exiting."
+		// 		);
+		// 		process.exit(1);
+		// 	}
+
+		// 	console.log("===========================================");
+		// 	console.log("Removing content script functionality...");
+		// 	displayWarning(
+		// 		"Remove firefox extension content script functionality"
+		// 	);
+
+		// 	await askForConfirmation(
+		// 		"remove firefox extension content script functionality"
+		// 	);
+
+		// 	deleteFile("./src/components/DisplayH1InPage.tsx");
+		// 	deleteFile("./src/utils/sendContentScriptMessage.ts");
+		// 	deleteFile("./src/types/ContentScript.ts");
+		// 	deleteFile("./src/contentScript.ts");
+
+		// 	// Update ./src/App.tsx: remove lines containing DisplayH1InPage
+		// 	if (fileExists("./src/App.tsx")) {
+		// 		const appPath = "./src/App.tsx";
+		// 		updateFileLog(appPath, false);
+		// 		const content = fs
+		// 			.readFileSync(appPath, "utf8")
+		// 			.split("\n")
+		// 			.filter((l) => !l.includes("DisplayH1InPage"))
+		// 			.join("\n");
+		// 		fs.writeFileSync(appPath, content, "utf8");
+		// 	}
+
+		// 	// Update manifest.json safely: remove content_scripts and keep permissions as-is
+		// 	if (fileExists("./public/manifest.json")) {case "3": {
+		// 	checkIfDisabledChoiceIsSelected(
+		// 		3,
+		// 		hasManifest,
+		// 		choiceThreeDisabledNotice
+		// 	);
+
+		// 	displayWarning("Remove firefox extension functionality");
+
+		// 	await askForConfirmation("remove firefox extension functionality");
+
+		// 	deleteFile("./src/components/DisplayH1InPage.tsx");
+		// 	deleteFile("./src/utils/sendContentScriptMessage.ts");
+		// 	deleteFile("./src/types/contentScriptTypes.ts");
+		// 	deleteFile("./src/contentScript.ts");
+		// 	deleteFile("./public/manifest.json");
+
+		// 	removeNpmPackage("@types/firefox-webext-browser");
+
+		// 	// Update ./src/App.tsx: remove lines containing DisplayH1InPage
+		// 	// if (fileExists("./src/App.tsx")) {
+		// 	// 	const appPath = "./src/App.tsx";
+		// 	// 	updateFileLog(appPath, false);
+		// 	// 	const content = fs
+		// 	// 		.readFileSync(appPath, "utf8")
+		// 	// 		.split("\n")
+		// 	// 		.filter((l) => !l.includes("DisplayH1InPage"))
+		// 	// 		.join("\n");
+
+		// 	// 	fs.writeFileSync(appPath, content, "utf8");
+		// 	// }
+
+		// 	// Update vite.config.ts: remove block between special comments
+		// 	if (fileExists("vite.config.ts")) {
+		// 		const viteConfigPath = "./vite.config.ts";
+		// 		updateFileLog(viteConfigPath);
+
+		// 		let content = fs.readFileSync(viteConfigPath, "utf8");
+		// 		content = content.replace(
+		// 			/\/\/! Browser Content Script Only[\s\S]*?\/\/! ---------------------/g,
+		// 			""
+		// 		);
+		// 		fs.writeFileSync(viteConfigPath, content, "utf8");
+		// 	}
+
+		// 	break;
+		// }
+
+		// case "4": {
+		// 	if (!hasContentScript) {
+		// 		console.error(
+		// 			"Option 4 is disabled because 'src/contentScript.ts' was not found. Exiting."
+		// 		);
+		// 		process.exit(1);
+		// 	}
+
+		// 	console.log("===========================================");
+		// 	console.log("Removing content script functionality...");
+		// 	displayWarning(
+		// 		"Remove firefox extension content script functionality"
+		// 	);
+
+		// 	await askForConfirmation(
+		// 		"remove firefox extension content script functionality"
+		// 	);
+
+		// 	deleteFile("./src/components/DisplayH1InPage.tsx");
+		// 	deleteFile("./src/utils/sendContentScriptMessage.ts");
+		// 	deleteFile("./src/types/ContentScript.ts");
+		// 	deleteFile("./src/contentScript.ts");
+
+		// 	// Update ./src/App.tsx: remove lines containing DisplayH1InPage
+		// 	if (fileExists("./src/App.tsx")) {
+		// 		const appPath = "./src/App.tsx";
+		// 		updateFileLog(appPath, false);
+		// 		const content = fs
+		// 			.readFileSync(appPath, "utf8")
+		// 			.split("\n")
+		// 			.filter((l) => !l.includes("DisplayH1InPage"))
+		// 			.join("\n");
+		// 		fs.writeFileSync(appPath, content, "utf8");
+		// 	}
+
+		// 	// Update manifest.json safely: remove content_scripts and keep permissions as-is
+		// 	if (fileExists("./public/manifest.json")) {
+		// 		const manifestPath = "./public/manifest.json";
+		// 		updateFileLog(manifestPath, false);
+		// 		try {
+		// 			const raw = fs.readFileSync(manifestPath, "utf8");
+		// 			const obj = JSON.parse(raw);
+		// 			if ("content_scripts" in obj) delete obj["content_scripts"];
+		// 			// ensure permissions is an array (leave unchanged otherwise)
+		// 			if (!Array.isArray(obj.permissions)) obj.permissions = [];
+		// 			fs.writeFileSync(
+		// 				manifestPath,
+		// 				JSON.stringify(obj, null, 2),
+		// 				"utf8"
+		// 			);
+		// 			console.log(`${YELLOW}[Updated] ${manifestPath}${RESET}`);
+		// 		} catch (err) {
+		// 			console.error(
+		// 				`${RED}Failed to parse or update manifest.json: ${err}${RESET}`
+		// 			);
+		// 		}
+		// 	}
+
+		// 	if (fileExists("vite.config.ts")) {
+		// 		const vc = "vite.config.ts";
+		// 		updateFileLog(vc, false);
+		// 		let content = fs.readFileSync(vc, "utf8");
+		// 		content = content.replace(
+		// 			/\/\/! Browser Content Script Only[\s\S]*?\/\/! ---------------------/g,
+		// 			""
+		// 		);
+		// 		fs.writeFileSync(vc, content, "utf8");
+		// 	}
+
+		// 	break;
+		// }
+		// 		const manifestPath = "./public/manifest.json";
+		// 		updateFileLog(manifestPath, false);
+		// 		try {
+		// 			const raw = fs.readFileSync(manifestPath, "utf8");
+		// 			const obj = JSON.parse(raw);
+		// 			if ("content_scripts" in obj) delete obj["content_scripts"];
+		// 			// ensure permissions is an array (leave unchanged otherwise)
+		// 			if (!Array.isArray(obj.permissions)) obj.permissions = [];
+		// 			fs.writeFileSync(
+		// 				manifestPath,
+		// 				JSON.stringify(obj, null, 2),
+		// 				"utf8"
+		// 			);
+		// 			console.log(`${YELLOW}[Updated] ${manifestPath}${RESET}`);
+		// 		} catch (err) {
+		// 			console.error(
+		// 				`${RED}Failed to parse or update manifest.json: ${err}${RESET}`
+		// 			);
+		// 		}
+		// 	}
+
+		// 	if (fileExists("vite.config.ts")) {
+		// 		const vc = "vite.config.ts";
+		// 		updateFileLog(vc, false);
+		// 		let content = fs.readFileSync(vc, "utf8");
+		// 		content = content.replace(
+		// 			/\/\/! Browser Content Script Only[\s\S]*?\/\/! ---------------------/g,
+		// 			""
+		// 		);
+		// 		fs.writeFileSync(vc, content, "utf8");
+		// 	}
+
+		// 	break;
+		// }
+
+		default:
+			console.error("Invalid choice. Exiting.");
+			process.exit(1);
+	}
+
+	console.log(`${GREEN}Done! Remember to delete this script!${RESET}`);
+	process.exit(0);
+}
+
+//MARK: Run main
+main().catch((err) => {
+	console.error(`${RED}Unexpected error: ${err}${RESET}`);
+	process.exit(1);
+});

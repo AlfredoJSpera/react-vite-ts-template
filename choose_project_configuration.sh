@@ -1,12 +1,18 @@
 #!/bin/bash
 
-# Combined project configuration script
-# Options:
-# 1 - Use both predefined and user-defined themes (removes "WithoutCustomThemes" directories)
-# 2 - Use ONLY predefined themes (replace files from WithoutCustomThemes into place)
-# 3 - Remove firefox extension files
-
+# Exit immediately if there are any errors
 set -e
+
+#MARK: Colors
+RED="\033[31m"
+YELLOW="\033[33m"
+MAGENTA="\033[35m"
+CYAN="\033[36m"
+GREEN="\033[32m"
+RESET="\033[0m"
+
+
+#MARK: Search for specific files
 
 has_without_custom=false
 if find ./public ./src -type d -name 'WithoutCustomThemes' -print -quit | grep -q .; then
@@ -23,62 +29,103 @@ if [ -f "./src/contentScript.ts" ]; then
 	has_content_script=true
 fi
 
+#MARK: Display choices
+
+display_choices() {
+	local choice_number=$1
+	local choice_prompt=$2
+	local is_not_disabled=$3
+	local disabled_notice=$4
+
+	if $is_not_disabled; then
+		echo "    ${choice_number}) ${choice_prompt}"
+	else
+		echo "    ${choice_number}) ${choice_prompt} (disabled because ${disabled_notice})"
+	fi
+}
+
 echo "Theme configuration:"
-if $has_without_custom; then
-	echo "    1) Use both predefined and user-defined themes"
-	echo "    2) Use ONLY predefined themes"
-else
-	echo "    1) Use both predefined and user-defined themes (disabled because 'WithoutCustomThemes' was not found)"
-	echo "    2) Use ONLY predefined themes (disabled because 'WithoutCustomThemes' was not found)"
-fi
-
+choice_one_and_two_disabled_notice="'WithoutCustomThemes' was not found"
+display_choices 1 "Use both predefined and user-defined themes" $has_without_custom "${choice_one_and_two_disabled_notice}"
+display_choices 2 "Use ONLY predefined themes" $has_without_custom "${choice_one_and_two_disabled_notice}"
 echo 
+
 echo "Firefox extension configurations:"
-if $has_manifest; then
-	echo "    3) Remove ALL firefox extension files"
-else
-	echo "    3) Remove ALL firefox extension files (disabled because 'public/manifest.json' was not found)"
-fi
-
-if $has_content_script; then
-	echo "    4) Remove content script files"
-else
-	echo "    4) Remove content script files (disabled because 'src/contentScript.ts' was not found)"
-fi
-
+choice_three_disabled_notice="'public/manifest.json' was not found"
+display_choices 3 "Remove ALL firefox extension files" $has_manifest "${choice_three_disabled_notice}"
+choice_four_disabled_notice="'src/contentScript.json' was not found"
+display_choices 4 "Remove content script files" $has_content_script "${choice_four_disabled_notice}"
 echo
-read -p "Enter choice (1/2/3/4): " choice
+
+#MARK: Common operation functions
+
+check_if_disabled_choice_is_selected() {
+	local choice_number=$1
+	local is_not_disabled=$2
+	local disabled_notice=$3
+
+	if ! $is_not_disabled; then
+		echo "${RED}Option ${choice_number} is disabled because ${disabled_notice}.${RESET} Exiting..."
+		exit 1
+	fi
+}
 
 display_warning() {
-	echo -e "\033[31mWARNING: This action is intended to be run only once, immediately after cloning the repository.\033[0m"
-	echo -e "\033[31mIf you have made changes to any of the listed files, do NOT run this. \033[0m"
+	local operation_description=$1
+	echo "==========================================="
+	echo "${operation_description}"
+	echo -e "${RED}WARNING: This action is intended to be run only once, immediately after cloning the repository.${RESET}"
+	echo -e "${RED}If you have made changes to any of the listed files, do NOT run this.${RESET}"
+}
+
+ask_for_confirmation() {
+	local operation_description=$1
+	read -p "Are you sure you want to ${operation_description}? (y/N): " confirm
+	if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+		echo "Operation aborted."
+		exit 1
+	fi
 }
 
 delete_file() {
 	local file_to_delete=$1
 
 	if [ -f "${file_to_delete}" ]; then
-		echo -e "\033[32m[Deleting file] ${file_to_delete}\033[0m"
+		echo -e "${YELLOW}[Deleting file] ${file_to_delete}${RESET}"
 		rm "${file_to_delete}"
 	fi
 }
 
+delete_directory() {
+	local directory_to_delete=$1
+	echo -e "${MAGENTA}[Deleting directory] ${directory_to_delete}${RESET}"
+	rm -rf "${directory_to_delete}"
+}
+
+remove_npm_package() {
+	local package_to_remove=$1
+	echo -e "${CYAN}[Removing npm package] ${package_to_remove}${RESET}"
+	npm remove "${package_to_remove}"
+}
+
+update_file_log() {
+	local file_to_update=$1
+	local is_import_update=$2
+	if $is_import_update; then
+		echo -e "${GREEN}[Updating imports] ${file_to_update}${RESET}"
+	else
+		echo -e "${GREEN}[Updating file] ${file_to_update}${RESET}"
+	fi
+}
+
+#MARK: Case Switch
+
+read -p "Enter choice (1/2/3/4): " choice
 case "$choice" in
 	1)
-		if ! $has_without_custom; then
-			echo "Option 1 is disabled because 'WithoutCustomThemes' was not found. Exiting."
-			exit 1
-		fi
-
-		echo -e "==========================================="
-		echo -e "Removing predefined theming only functionality..."
-		display_warning
-
-		read -p "Are you sure you want to remove the functionality to use only predefined themes? (y/N): " confirm
-		if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-			echo "Operation aborted."
-			exit 1
-		fi
+		check_if_disabled_choice_is_selected 1 $has_without_custom "${choice_one_and_two_disabled_notice}"
+		display_warning "Removing functionality to use only predefined themes..."
+		ask_for_confirmation "remove the functionality to use only predefined themes"
 
 		delete_without_custom_themes_directory() {
 			local directory_to_delete=$1
