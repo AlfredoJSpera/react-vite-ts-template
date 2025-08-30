@@ -172,6 +172,7 @@ const hasWithoutCustom = directoryExistsInRoots(
 );
 const hasManifest = fileExists("./public/manifest.json");
 const hasContentScript = fileExists("./src/contentScript.ts");
+const hasPages = directoryExists("./src/pages");
 
 //MARK: Display choices
 
@@ -205,6 +206,16 @@ displayChoices(
 	"Remove content script files",
 	hasContentScript,
 	choiceFourDisabledNotice
+);
+console.log();
+
+console.log("Multi-page router configurations:");
+const choiceFiveDisabledNotice = "'src/pages' was not found";
+displayChoices(
+	5,
+	"Remove multi-page functionality",
+	hasPages,
+	choiceFiveDisabledNotice
 );
 console.log();
 
@@ -304,8 +315,6 @@ async function main() {
 
 			break;
 		}
-
-		// TODO: REMAKE CASE 3 AND 4 ONCE ROOT/APP ROUTES ARE DONE
 
 		case "3": {
 			checkIfDisabledChoiceIsSelected(
@@ -435,6 +444,69 @@ async function main() {
 					""
 				);
 				fs.writeFileSync(viteConfigPath, content, "utf8");
+			}
+
+			break;
+		}
+
+		case "5": {
+			checkIfDisabledChoiceIsSelected(
+				5,
+				hasPages,
+				choiceFiveDisabledNotice
+			);
+
+			displayWarning("Removing multi-page functionality...");
+
+			await askForConfirmation("remove multi-page functionality");
+
+			deleteDirectory("./src/pages");
+			deleteFile("./src/components/ChangePage.tsx");
+
+			removeNpmPackage("react-router-dom");
+
+			const mainPath = "./src/main.tsx";
+			if (fileExists(mainPath)) {
+				updateFileLog(mainPath);
+
+				let content = fs
+					.readFileSync(mainPath, "utf8")
+					.split("\n")
+					.filter(
+						(l) =>
+							!(
+								l.includes("About") ||
+								l.includes("NotFound") ||
+								l.includes("HashRouter") ||
+								l.includes("BrowserRouter") ||
+								l.includes("Hash Router") ||
+								l.includes("Browser Router")
+							)
+					)
+					.join("\n");
+
+				// Replace the entire <Routes>...</Routes> block with <App />
+				content = content.replace(
+					/<Routes>[\s\S]*?<\/Routes>/g,
+					"<App />"
+				);
+
+				fs.writeFileSync(mainPath, content, "utf8");
+			}
+
+			// edit App.tsx: remove ChangePage import and usage
+			const appPath = "./src/App.tsx";
+			if (fileExists(appPath)) {
+				updateFileLog(appPath);
+
+				// Remove any lines containing the ChangePage component usage
+				const content = fs
+					.readFileSync(appPath, "utf8")
+					.split("\n")
+					.filter((l) => !l.includes("ChangePage"))
+					.join("\n");
+
+				fs.writeFileSync(appPath, content, "utf8");
 			}
 
 			break;
