@@ -5,6 +5,7 @@ import { ThemeProvider } from "./theme/ThemeProvider.tsx";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import About from "./pages/About.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import SlugExample from "./pages/SlugExample.tsx";
 
 // Use Browser Router if it's for a regular website
 // Use Hash Router if it's for an extension
@@ -15,8 +16,13 @@ createRoot(document.getElementById("root")!).render(
 				<Routes>
 					<Route path="/" element={<App />} />
 					<Route path="/about" element={<About />} />
+					<Route path="/slug/:id" element={<SlugExample />} />
+
 					{/* Catch-all route for not found pages */}
 					<Route path="*" element={<NotFound />} />
+
+					{/* Slug without id to not found */}
+					<Route path="/slug" element={<NotFound />} />
 				</Routes>
 			</ThemeProvider>
 		</HashRouter>

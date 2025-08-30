@@ -1,13 +1,13 @@
 # react-vite-ts-template
 
-A small template for a **React** + **Vite** + **TypeScript** app that can run as a normal web app or be packaged as a _browser extension_ (Firefox). It includes a _simple theme_ system (predefined + optional custom themes), an early theme loader to avoid [FOUC](https://en.wikipedia.org/wiki/Flash_of_unstyled_content), and content script integration.
+A small template for a **React 19** + **Vite 7** + **TypeScript** app that can run as a normal web app or be packaged as a _browser extension_ (Firefox). It includes a _simple theme_ system (predefined + optional custom themes), an early theme loader to avoid [FOUC](https://en.wikipedia.org/wiki/Flash_of_unstyled_content), and content script integration.
 
 ## Highlights
 
 ### Themes
 
 -   Theme system with predefined themes
--   Custom themes defined at runtime (by the user, for example) saved in localStorage and applied as CSS variables
+-   Custom themes defined at runtime (by the user) saved in localStorage and applied as CSS variables
 -   Theme hook, context helper and provider ([example of a component using these](src/components/ThemeSwitcher.tsx))
 -   "Without custom themes" alternate implementation (lighter, only predefined themes)
 -   Early theme application before React mounts for the FOUC fix
@@ -121,7 +121,7 @@ The project includes a content script that reads the first H1 on the page and it
 
 This template ships with client-side routing ready: routes are defined in `src/main.tsx` (the template uses `HashRouter` by default for extension builds and provides routes for `/` and `/about`).
 
-To add a new page, create a component under `src/pages` (for example `Contact.tsx`) and register a route `src/main.tsx` like this:
+To add a new page, create a component under `src/pages` (e.g., `Contact.tsx`) and register a route `src/main.tsx` like this:
 
 ```tsx
 <Route path="/contact" element={<Contact />} />
@@ -132,7 +132,16 @@ To add a new page, create a component under `src/pages` (for example `Contact.ts
 > -   Use `HashRouter` when building the app as a browser extension
 > -   Switch to `BrowserRouter` for a normal website
 
-This keeps the template flexible for both single-page web apps and multi-page-like navigation inside an extension.
+This approach ensures compatibility with both environments:
+
+-   For web apps, it maintains clean URLs (e.g., `/example/page`)
+-   For browser extensions, it uses hash-based URLs (e.g., `/#/example/page`), where URL structure is less critical
+
+### Slugs
+
+This project includes `src/pages/SlugExample.tsx` as an example route that demonstrates how to read route "slugs" (dynamic segments) from the URL. You can set slug routes in `src/main.tsx`.
+
+For more information, see [the API reference of react-route-dom](https://reactrouter.com/api/hooks/useParams#useparams).
 
 ## License
 
