@@ -65,10 +65,9 @@ function searchDirectoryRecursive(
 
 //MARK: Operation functions
 
-function deleteFile(filePath: string, noLogging: boolean = false) {
+function deleteFile(filePath: string) {
 	if (fileExists(filePath)) {
-		if (noLogging)
-			console.log(`${YELLOW}[Deleting file] ${filePath}${RESET}`);
+		console.log(`${YELLOW}[Deleting file] ${filePath}${RESET}`);
 		fs.unlinkSync(filePath);
 	}
 }
@@ -98,7 +97,9 @@ function updateFileLog(fileToUpdate: string, isImportUpdate = false) {
 }
 
 function moveFile(oldPath: string, newPath: string) {
-	if (fileExists(newPath)) {
+	if (fileExists(oldPath)) {
+		console.log(`${YELLOW}[Moving file] ${oldPath} -> ${newPath}${RESET}`);
+
 		// Makes sure the destination directory exists
 		fs.mkdirSync(path.dirname(oldPath), {
 			recursive: true,
@@ -265,11 +266,11 @@ async function main() {
 				);
 
 				// Replace the original file with the theme-less file
-				deleteFile(originalFilePath, true);
+				deleteFile(originalFilePath);
 				moveFile(themeLessFilePath, originalFilePath);
 
 				// Update imports in replaced files
-				if (fileExists(themeLessFilePath)) {
+				if (fileExists(originalFilePath)) {
 					updateFileLog(originalFilePath, true);
 
 					let content = fs.readFileSync(originalFilePath, "utf8");
@@ -554,7 +555,7 @@ async function main() {
 			process.exit(1);
 	}
 
-	console.log(`${GREEN}Done! Remember to delete this script!${RESET}`);
+	console.log(`Done! Remember to delete this script!`);
 	process.exit(0);
 }
 
