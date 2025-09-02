@@ -14,12 +14,14 @@ const CYAN = "\u001b[36m";
 const GREEN = "\u001b[32m";
 const RESET = "\u001b[0m";
 
-//MARK: Helpers
+//MARK: File and Directories functions
 
+/** Checks whether the specified path exists and is a file. */
 function fileExists(filePath: string) {
 	return fs.existsSync(filePath) && fs.lstatSync(filePath).isFile();
 }
 
+/** Checks whether the specified path exists and is a directory. */
 function directoryExists(directoryPath: string) {
 	return (
 		fs.existsSync(directoryPath) &&
@@ -27,6 +29,7 @@ function directoryExists(directoryPath: string) {
 	);
 }
 
+/** Returns the number of files in the specified directory. */
 function getDirectoryFileNumber(directoryPath: string) {
 	if (directoryExists(directoryPath)) {
 		return fs.readdirSync(directoryPath).length;
@@ -35,30 +38,30 @@ function getDirectoryFileNumber(directoryPath: string) {
 	}
 }
 
+/** Recursively searches for a directory with the specified name within a given directory path. */
+function searchDirectoryRecursive(
+	directoryPath: string,
+	targetName: string
+): boolean {
+	const entries = fs.readdirSync(directoryPath, { withFileTypes: true });
+
+	for (const e of entries) {
+		if (e.isDirectory() && e.name === targetName) return true;
+		if (e.isDirectory()) {
+			const sub = path.join(directoryPath, e.name);
+			if (searchDirectoryRecursive(sub, targetName)) return true;
+		}
+	}
+
+	return false;
+}
+
+/** Checks if a directory with the specified name exists within any of the given root directories. */
 function directoryExistsInRoots(roots: string[], targetName: string): boolean {
 	for (const root of roots) {
 		if (!fs.existsSync(root)) continue;
 		const found = searchDirectoryRecursive(root, targetName);
 		if (found) return true;
-	}
-	return false;
-}
-
-function searchDirectoryRecursive(
-	directoryPath: string,
-	targetName: string
-): boolean {
-	try {
-		const entries = fs.readdirSync(directoryPath, { withFileTypes: true });
-		for (const e of entries) {
-			if (e.isDirectory() && e.name === targetName) return true;
-			if (e.isDirectory()) {
-				const sub = path.join(directoryPath, e.name);
-				if (searchDirectoryRecursive(sub, targetName)) return true;
-			}
-		}
-	} catch {
-		// ignore
 	}
 	return false;
 }
@@ -79,16 +82,15 @@ function deleteDirectory(dirPath: string) {
 	}
 }
 
-function removeNpmPackage(pkg: string) {
-	console.log(`${CYAN}[Removing npm package] ${pkg}${RESET}`);
-	const res = spawnSync("npm", ["remove", pkg], { stdio: "inherit" });
-	if (res.error) {
-		console.error(`${RED}npm remove failed: ${res.error}${RESET}`);
+/** Logs an update message for a specified file path. */
+function updateFileLog(filePath: string, description?: string) {
+	if (description) {
+		console.log(
+			`${GREEN}[Updating file] ${filePath}: ${description}${RESET}`
+		);
+	} else {
+		console.log(`${GREEN}[Updating file] ${filePath}${RESET}`);
 	}
-}
-
-function updateFileLog(fileToUpdate: string) {
-	console.log(`${GREEN}[Updating file] ${fileToUpdate}${RESET}`);
 }
 
 function moveFile(oldPath: string, newPath: string) {
@@ -96,12 +98,49 @@ function moveFile(oldPath: string, newPath: string) {
 		console.log(`${YELLOW}[Moving file] ${oldPath} -> ${newPath}${RESET}`);
 
 		// Makes sure the destination directory exists
-		fs.mkdirSync(path.dirname(oldPath), {
+		fs.mkdirSync(path.dirname(newPath), {
 			recursive: true,
 		});
 
-		// Move the file
 		fs.renameSync(oldPath, newPath);
+	}
+}
+
+function removeNpmPackage(pkg: string) {
+	console.log(`${CYAN}[Removing npm package] ${pkg}${RESET}`);
+
+	const res = spawnSync("npm", ["remove", pkg], { stdio: "inherit" });
+	if (res.error) {
+		console.error(`${RED}npm remove failed: ${res.error}${RESET}`);
+	}
+}
+
+/*
+function installNpmPackage(pkg: string) {
+	console.log(`${CYAN}[Installing npm package] ${pkg}${RESET}`);
+
+	const res = spawnSync("npm", ["install", pkg], { stdio: "inherit" });
+	if (res.error) {
+		console.error(`${RED}npm install failed: ${res.error}${RESET}`);
+	}
+}
+*/
+
+/** Removes all lines from the specified file that contain any of the provided substrings. */
+function removeLinesContaining(filePath: string, substrings: string[]) {
+	if (fileExists(filePath)) {
+		updateFileLog(
+			filePath,
+			`Removing lines containing references to {${substrings}}`
+		);
+
+		const content = fs
+			.readFileSync(filePath, "utf8")
+			.split("\n")
+			.filter((line) => !substrings.some((sub) => line.includes(sub)))
+			.join("\n");
+
+		fs.writeFileSync(filePath, content, "utf8");
 	}
 }
 
@@ -114,6 +153,7 @@ async function prompt(question: string) {
 	return answer;
 }
 
+/** Checks if a disabled choice has been selected and exits the process with an error message if so. */
 function checkIfDisabledChoiceIsSelected(
 	choiceNumber: number | string,
 	isNotDisabled: boolean,
@@ -177,7 +217,9 @@ const hasPages = directoryExists("./src/pages");
 //MARK: Display choices
 
 console.log("Theme configuration:");
+
 const withoutCustomThemesMissingNotice = "'WithoutCustomThemes' was not found";
+
 const choiceRemoveThemesNumber = "1";
 displayChoices(
 	choiceRemoveThemesNumber,
@@ -185,6 +227,7 @@ displayChoices(
 	hasWithoutCustom,
 	withoutCustomThemesMissingNotice
 );
+
 const choiceFullThemesNumber = "2";
 displayChoices(
 	choiceFullThemesNumber,
@@ -192,6 +235,7 @@ displayChoices(
 	hasWithoutCustom,
 	withoutCustomThemesMissingNotice
 );
+
 const choicePredefinedThemesOnlyNumber = "3";
 displayChoices(
 	choicePredefinedThemesOnlyNumber,
@@ -202,6 +246,7 @@ displayChoices(
 console.log();
 
 console.log("Firefox extension configurations:");
+
 const missingManifestNotice = "'public/manifest.json' was not found";
 const choiceRemoveFirefoxNumber = "4";
 displayChoices(
@@ -210,6 +255,7 @@ displayChoices(
 	hasManifest,
 	missingManifestNotice
 );
+
 const contentScriptMissingNotice = "'src/contentScript.ts' was not found";
 const choiceRemoveContentScriptNumber = "5";
 displayChoices(
@@ -221,6 +267,7 @@ displayChoices(
 console.log();
 
 console.log("Multi-page router configurations:");
+
 const pagesDirectoryMissingNotice = "'src/pages' was not found";
 const choiceRemoveMultiPageNumber = "6";
 displayChoices(
@@ -260,49 +307,13 @@ async function main() {
 			deleteFile("./src/hooks/useThemeContext.ts");
 			deleteFile("./src/types/Theme.ts");
 
-			const htmlPath = "./index.html";
-			if (fileExists(htmlPath)) {
-				updateFileLog(htmlPath);
-				// Remove lines containing theme or Theme
-				const content = fs
-					.readFileSync(htmlPath, "utf8")
-					.split("\n")
-					.filter((l) => !l.toLowerCase().includes("theme"))
-					.join("\n");
-
-				fs.writeFileSync(htmlPath, content, "utf8");
-			}
-
-			const mainPath = "./src/main.tsx";
-			if (fileExists(mainPath)) {
-				updateFileLog(mainPath);
-				// Remove lines containing ThemeProvider
-				const content = fs
-					.readFileSync(mainPath, "utf8")
-					.split("\n")
-					.filter((l) => !l.includes("ThemeProvider"))
-					.join("\n");
-
-				fs.writeFileSync(mainPath, content, "utf8");
-			}
-
-			const removeThemeButton = (path) => {
-				if (fileExists(path)) {
-					updateFileLog(path);
-					// Remove lines containing ThemeButton
-					const content = fs
-						.readFileSync(path, "utf8")
-						.split("\n")
-						.filter((l) => !l.includes("ThemeButton"))
-						.join("\n");
-
-					fs.writeFileSync(path, content, "utf8");
-				}
-			};
-
-			removeThemeButton("./src/App.tsx");
-			removeThemeButton("./src/pages/About.tsx");
-			removeThemeButton("./src/pages/SlugExample.tsx");
+			removeLinesContaining("./index.html", ["theme", "Theme"]);
+			removeLinesContaining("./src/main.tsx", ["ThemeProvider"]);
+			removeLinesContaining("./src/App.tsx", ["ThemeButton"]);
+			removeLinesContaining("./src/pages/About.tsx", ["ThemeButton"]);
+			removeLinesContaining("./src/pages/SlugExample.tsx", [
+				"ThemeButton",
+			]);
 
 			break;
 		}
@@ -358,7 +369,7 @@ async function main() {
 
 				// Update imports in replaced files
 				if (fileExists(originalFilePath)) {
-					updateFileLog(originalFilePath);
+					updateFileLog(originalFilePath, "Adjusting import paths");
 
 					let content = fs.readFileSync(originalFilePath, "utf8");
 
@@ -394,25 +405,10 @@ async function main() {
 			replaceFiles("./src/theme", "ThemeContext.ts");
 			replaceFiles("./src/theme", "ThemeProvider.tsx");
 
-			const typePath = "./src/types/Theme.ts";
-			if (fileExists(typePath)) {
-				updateFileLog(typePath);
-
-				// Remove lines containing DisplayH1InPage
-				const content = fs
-					.readFileSync(typePath, "utf8")
-					.split("\n")
-					.filter(
-						(l) =>
-							!(
-								l.includes("customVariables") ||
-								l.includes("custom")
-							)
-					)
-					.join("\n");
-
-				fs.writeFileSync(typePath, content, "utf8");
-			}
+			removeLinesContaining("./src/types/Theme.ts", [
+				"customVariables",
+				"custom",
+			]);
 
 			break;
 		}
@@ -436,23 +432,14 @@ async function main() {
 
 			removeNpmPackage("@types/firefox-webext-browser");
 
-			const appPath = "./src/App.tsx";
-			if (fileExists(appPath)) {
-				updateFileLog(appPath);
-
-				// Remove lines containing DisplayH1InPage
-				const content = fs
-					.readFileSync(appPath, "utf8")
-					.split("\n")
-					.filter((l) => !l.includes("DisplayH1InPage"))
-					.join("\n");
-
-				fs.writeFileSync(appPath, content, "utf8");
-			}
+			removeLinesContaining("./src/App.tsx", ["DisplayH1InPage"]);
 
 			const viteConfigPath = "./vite.config.ts";
 			if (fileExists(viteConfigPath)) {
-				updateFileLog(viteConfigPath);
+				updateFileLog(
+					viteConfigPath,
+					"Removing lines for content script building"
+				);
 
 				// Remove block between special comments
 				let content = fs.readFileSync(viteConfigPath, "utf8");
@@ -465,7 +452,10 @@ async function main() {
 
 			const mainPath = "./src/main.tsx";
 			if (fileExists(mainPath)) {
-				updateFileLog(mainPath);
+				updateFileLog(
+					mainPath,
+					"Replacing HashRouter with BrowserRouter if multi-page functionality is on"
+				);
 
 				// Change from HashRouter to BrowserRouter
 				let content = fs.readFileSync(mainPath, "utf8");
@@ -499,23 +489,11 @@ async function main() {
 			deleteFile("./src/types/ContentScript.ts");
 			deleteFile("./src/contentScript.ts");
 
-			const appPath = "./src/App.tsx";
-			if (fileExists(appPath)) {
-				updateFileLog(appPath);
-
-				// Remove lines containing DisplayH1InPage
-				const content = fs
-					.readFileSync(appPath, "utf8")
-					.split("\n")
-					.filter((l) => !l.includes("DisplayH1InPage"))
-					.join("\n");
-
-				fs.writeFileSync(appPath, content, "utf8");
-			}
+			removeLinesContaining("./src/App.tsx", ["DisplayH1InPage"]);
 
 			const manifestPath = "./public/manifest.json";
 			if (fileExists(manifestPath)) {
-				updateFileLog(manifestPath);
+				updateFileLog(manifestPath, "Remove the content_scripts array");
 				try {
 					// Update manifest.json safely: remove content_scripts
 					const raw = fs.readFileSync(manifestPath, "utf8");
@@ -536,7 +514,10 @@ async function main() {
 
 			const viteConfigPath = "./vite.config.ts";
 			if (fileExists(viteConfigPath)) {
-				updateFileLog(viteConfigPath);
+				updateFileLog(
+					viteConfigPath,
+					"Removing lines for content script building"
+				);
 
 				// Remove block between special comments
 				let content = fs.readFileSync(viteConfigPath, "utf8");
@@ -567,25 +548,20 @@ async function main() {
 			removeNpmPackage("react-router-dom");
 
 			const mainPath = "./src/main.tsx";
-			if (fileExists(mainPath)) {
-				updateFileLog(mainPath);
+			removeLinesContaining(mainPath, [
+				"About",
+				"SlugExample",
+				"NotFound",
+				"HashRouter",
+				"BrowserRouter",
+				"Hash Router",
+				"Browser Router",
+			]);
 
-				let content = fs
-					.readFileSync(mainPath, "utf8")
-					.split("\n")
-					.filter(
-						(l) =>
-							!(
-								l.includes("About") ||
-								l.includes("SlugExample") ||
-								l.includes("NotFound") ||
-								l.includes("HashRouter") ||
-								l.includes("BrowserRouter") ||
-								l.includes("Hash Router") ||
-								l.includes("Browser Router")
-							)
-					)
-					.join("\n");
+			if (fileExists(mainPath)) {
+				updateFileLog(mainPath, "Replacing the Routes block with App");
+
+				let content = fs.readFileSync(mainPath, "utf8");
 
 				// Replace the entire <Routes>...</Routes> block with <App />
 				content = content.replace(
@@ -596,20 +572,7 @@ async function main() {
 				fs.writeFileSync(mainPath, content, "utf8");
 			}
 
-			// edit App.tsx: remove ChangePage import and usage
-			const appPath = "./src/App.tsx";
-			if (fileExists(appPath)) {
-				updateFileLog(appPath);
-
-				// Remove any lines containing the ChangePage component usage
-				const content = fs
-					.readFileSync(appPath, "utf8")
-					.split("\n")
-					.filter((l) => !l.includes("ChangePage"))
-					.join("\n");
-
-				fs.writeFileSync(appPath, content, "utf8");
-			}
+			removeLinesContaining("./src/App.tsx", ["ChangePage"]);
 
 			break;
 		}
