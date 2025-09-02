@@ -115,7 +115,7 @@ async function prompt(question: string) {
 }
 
 function checkIfDisabledChoiceIsSelected(
-	choiceNumber: number,
+	choiceNumber: number | string,
 	isNotDisabled: boolean,
 	disabledNotice: string
 ) {
@@ -150,7 +150,7 @@ async function askForConfirmation(operationDescription: string) {
 }
 
 function displayChoices(
-	choiceNumber: number,
+	choiceNumber: number | string,
 	promptText: string,
 	isNotDisabled: boolean,
 	disabledNotice: string
@@ -177,59 +177,140 @@ const hasPages = directoryExists("./src/pages");
 //MARK: Display choices
 
 console.log("Theme configuration:");
-const choiceOneAndTwoDisabledNotice = "'WithoutCustomThemes' was not found";
+const withoutCustomThemesMissingNotice = "'WithoutCustomThemes' was not found";
+const choiceRemoveThemesNumber = "1";
 displayChoices(
-	1,
+	choiceRemoveThemesNumber,
+	"Remove theming functionality",
+	hasWithoutCustom,
+	withoutCustomThemesMissingNotice
+);
+const choiceFullThemesNumber = "2";
+displayChoices(
+	choiceFullThemesNumber,
 	"Use both predefined and user-defined themes",
 	hasWithoutCustom,
-	choiceOneAndTwoDisabledNotice
+	withoutCustomThemesMissingNotice
 );
+const choicePredefinedThemesOnlyNumber = "3";
 displayChoices(
-	2,
+	choicePredefinedThemesOnlyNumber,
 	"Use ONLY predefined themes",
 	hasWithoutCustom,
-	choiceOneAndTwoDisabledNotice
+	withoutCustomThemesMissingNotice
 );
 console.log();
 
 console.log("Firefox extension configurations:");
-const choiceThreeDisabledNotice = "'public/manifest.json' was not found";
+const missingManifestNotice = "'public/manifest.json' was not found";
+const choiceRemoveFirefoxNumber = "4";
 displayChoices(
-	3,
+	choiceRemoveFirefoxNumber,
 	"Remove ALL firefox extension files",
 	hasManifest,
-	choiceThreeDisabledNotice
+	missingManifestNotice
 );
-const choiceFourDisabledNotice = "'src/contentScript.ts' was not found";
+const contentScriptMissingNotice = "'src/contentScript.ts' was not found";
+const choiceRemoveContentScriptNumber = "5";
 displayChoices(
-	4,
+	choiceRemoveContentScriptNumber,
 	"Remove content script files",
 	hasContentScript,
-	choiceFourDisabledNotice
+	contentScriptMissingNotice
 );
 console.log();
 
 console.log("Multi-page router configurations:");
-const choiceFiveDisabledNotice = "'src/pages' was not found";
+const pagesDirectoryMissingNotice = "'src/pages' was not found";
+const choiceRemoveMultiPageNumber = "6";
 displayChoices(
-	5,
+	choiceRemoveMultiPageNumber,
 	"Remove multi-page functionality",
 	hasPages,
-	choiceFiveDisabledNotice
+	pagesDirectoryMissingNotice
 );
 console.log();
 
 //MARK: Main
 
 async function main() {
-	const choiceRaw = await prompt("Enter choice (1/2/3/4): ");
+	const choiceRaw = await prompt("Enter choice (1/2/3/4/5/6): ");
 	const choice = choiceRaw.trim();
 	switch (choice) {
-		case "1": {
+		case choiceRemoveThemesNumber: {
 			checkIfDisabledChoiceIsSelected(
-				1,
+				choiceRemoveThemesNumber,
 				hasWithoutCustom,
-				choiceOneAndTwoDisabledNotice
+				withoutCustomThemesMissingNotice
+			);
+
+			displayWarning("Removing theming functionality...");
+
+			await askForConfirmation("remove the functionality to use themes");
+
+			deleteDirectory("./public/WithoutCustomThemes");
+			deleteDirectory("./src/components/WithoutCustomThemes");
+			deleteDirectory("./src/hooks/WithoutCustomThemes");
+			deleteDirectory("./src/theme");
+
+			deleteFile("./public/theme-loader.js");
+			deleteFile("./src/components/ThemeSwitcher.tsx");
+			deleteFile("./src/components/ThemeButton.tsx");
+			deleteFile("./src/hooks/useTheme.ts");
+			deleteFile("./src/hooks/useThemeContext.ts");
+			deleteFile("./src/types/Theme.ts");
+
+			const htmlPath = "./index.html";
+			if (fileExists(htmlPath)) {
+				updateFileLog(htmlPath);
+				// Remove lines containing theme or Theme
+				const content = fs
+					.readFileSync(htmlPath, "utf8")
+					.split("\n")
+					.filter((l) => !l.toLowerCase().includes("theme"))
+					.join("\n");
+
+				fs.writeFileSync(htmlPath, content, "utf8");
+			}
+
+			const mainPath = "./src/main.tsx";
+			if (fileExists(mainPath)) {
+				updateFileLog(mainPath);
+				// Remove lines containing ThemeProvider
+				const content = fs
+					.readFileSync(mainPath, "utf8")
+					.split("\n")
+					.filter((l) => !l.includes("ThemeProvider"))
+					.join("\n");
+
+				fs.writeFileSync(mainPath, content, "utf8");
+			}
+
+			const removeThemeButton = (path) => {
+				if (fileExists(path)) {
+					updateFileLog(path);
+					// Remove lines containing ThemeButton
+					const content = fs
+						.readFileSync(path, "utf8")
+						.split("\n")
+						.filter((l) => !l.includes("ThemeButton"))
+						.join("\n");
+
+					fs.writeFileSync(path, content, "utf8");
+				}
+			};
+
+			removeThemeButton("./src/App.tsx");
+			removeThemeButton("./src/pages/About.tsx");
+			removeThemeButton("./src/pages/SlugExample.tsx");
+
+			break;
+		}
+		case choiceFullThemesNumber: {
+			checkIfDisabledChoiceIsSelected(
+				choiceFullThemesNumber,
+				hasWithoutCustom,
+				withoutCustomThemesMissingNotice
 			);
 
 			displayWarning(
@@ -248,11 +329,11 @@ async function main() {
 			break;
 		}
 
-		case "2": {
+		case choicePredefinedThemesOnlyNumber: {
 			checkIfDisabledChoiceIsSelected(
-				2,
+				choicePredefinedThemesOnlyNumber,
 				hasWithoutCustom,
-				choiceOneAndTwoDisabledNotice
+				withoutCustomThemesMissingNotice
 			);
 
 			displayWarning(
@@ -313,14 +394,34 @@ async function main() {
 			replaceFiles("./src/theme", "ThemeContext.ts");
 			replaceFiles("./src/theme", "ThemeProvider.tsx");
 
+			const typePath = "./src/types/Theme.ts";
+			if (fileExists(typePath)) {
+				updateFileLog(typePath);
+
+				// Remove lines containing DisplayH1InPage
+				const content = fs
+					.readFileSync(typePath, "utf8")
+					.split("\n")
+					.filter(
+						(l) =>
+							!(
+								l.includes("customVariables") ||
+								l.includes("custom")
+							)
+					)
+					.join("\n");
+
+				fs.writeFileSync(typePath, content, "utf8");
+			}
+
 			break;
 		}
 
-		case "3": {
+		case choiceRemoveFirefoxNumber: {
 			checkIfDisabledChoiceIsSelected(
-				3,
+				choiceRemoveFirefoxNumber,
 				hasManifest,
-				choiceThreeDisabledNotice
+				missingManifestNotice
 			);
 
 			displayWarning("Removing firefox extension functionality...");
@@ -378,11 +479,11 @@ async function main() {
 			break;
 		}
 
-		case "4": {
+		case choiceRemoveContentScriptNumber: {
 			checkIfDisabledChoiceIsSelected(
-				4,
+				choiceRemoveContentScriptNumber,
 				hasContentScript,
-				choiceFourDisabledNotice
+				contentScriptMissingNotice
 			);
 
 			displayWarning(
@@ -449,11 +550,11 @@ async function main() {
 			break;
 		}
 
-		case "5": {
+		case choiceRemoveMultiPageNumber: {
 			checkIfDisabledChoiceIsSelected(
 				5,
 				hasPages,
-				choiceFiveDisabledNotice
+				pagesDirectoryMissingNotice
 			);
 
 			displayWarning("Removing multi-page functionality...");
@@ -476,6 +577,7 @@ async function main() {
 						(l) =>
 							!(
 								l.includes("About") ||
+								l.includes("SlugExample") ||
 								l.includes("NotFound") ||
 								l.includes("HashRouter") ||
 								l.includes("BrowserRouter") ||
